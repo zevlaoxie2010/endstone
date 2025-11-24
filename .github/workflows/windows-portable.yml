@@ -41,8 +41,8 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x86_64
+      - name: Build Project with Optimization
         run: |
-          # 在这里设置 MSVC 的编译选项
           msbuild YourProject.sln /p:Configuration=Release /p:OptimizationLevel=0
 
       - name: Set up CMake and Ninja
