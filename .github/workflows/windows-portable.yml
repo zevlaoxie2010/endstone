@@ -20,7 +20,7 @@ jobs:
     env:
       WP_URL: https://github.com/winpython/winpython/releases/download/17.2.20251123/WinPython64-3.14.0.2dotb3.exe
       WP_SHA256: 4759b4b97bf03a9cc9bcfa9fe5b7f9806b78736c0eb9fe8efd9696311b48ee8e
-      WP_BINARY_DIR: WPy64-31402
+      WP_BINARY_DIR: WPy64-31402\python
 
     steps:
       - name: Checkout Code
