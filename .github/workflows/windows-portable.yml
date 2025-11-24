@@ -40,10 +40,7 @@ jobs:
       - name: Set up MSVC
         uses: ilammy/msvc-dev-cmd@v1
         with:
-          arch: x86_64
-      - name: Build Project with Optimization
-        run: |
-          msbuild YourProject.sln /p:Configuration=Release /p:OptimizationLevel=0
+          arch: x86
 
       - name: Set up CMake and Ninja
         uses: lukka/get-cmake@latest
