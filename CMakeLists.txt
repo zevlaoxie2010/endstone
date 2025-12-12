@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.31)
+cmake_minimum_required(VERSION 3.23)
 project(endstone LANGUAGES CXX)
 
 # Endstone requires C++ 20
