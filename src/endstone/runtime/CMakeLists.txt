@@ -8,6 +8,7 @@ add_library(endstone_runtime SHARED
         bedrock_hooks/actor.cpp
         bedrock_hooks/bedrock_event_logger.cpp
         bedrock_hooks/campfire_block_actor.cpp
+        bedrock_hooks/certificate.cpp
         bedrock_hooks/dedicated_server.cpp
         bedrock_hooks/fire_block.cpp
         bedrock_hooks/health_attribute_delegate.cpp
@@ -57,7 +58,7 @@ if (UNIX)
     find_package(libelf REQUIRED)
     target_link_libraries(endstone_runtime PRIVATE libelf::libelf)
     target_link_options(endstone_runtime PRIVATE -g -Wl,--no-undefined,--exclude-libs,ALL)
-    target_compile_options(endstone_runtime PRIVATE -O2 -DNDEBUG -g -fvisibility=hidden -fms-extensions)
+    target_compile_options(endstone_runtime PRIVATE -O2 -DNDEBUG -g -fvisibility=hidden -fms-extensions -fno-delete-null-pointer-checks)
     if (ENDSTONE_SEPARATE_DEBUG_INFO)
         add_custom_command(
                 TARGET endstone_runtime
