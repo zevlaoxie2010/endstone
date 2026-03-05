@@ -1,11 +1,10 @@
 import lazy_loader as lazy
 
-__minecraft_version__ = "1.21.124"
-
 __getattr__, __dir__, __all__ = lazy.attach(
     __name__,
     submod_attrs={
         "_python": [
+            "__minecraft_version__",
             "ColorFormat",
             "EnchantmentRegistry",
             "GameMode",
@@ -16,11 +15,13 @@ __getattr__, __dir__, __all__ = lazy.attach(
             "Server",
             "Skin",
             "actor",
+            "attribute",
             "ban",
             "block",
             "boss",
             "command",
             "damage",
+            "effect",
             "enchantments",
             "event",
             "form",
@@ -28,8 +29,10 @@ __getattr__, __dir__, __all__ = lazy.attach(
             "lang",
             "level",
             "map",
+            "nbt",
             "permissions",
             "plugin",
+            "potion",
             "scheduler",
             "scoreboard",
             "util",
@@ -37,5 +40,3 @@ __getattr__, __dir__, __all__ = lazy.attach(
         "_version": ["__version__"],
     },
 )
-
-__all__.extend(["__minecraft_version__"])

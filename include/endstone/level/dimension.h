@@ -14,6 +14,10 @@
 
 #pragma once
 
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "endstone/block/block.h"
 #include "endstone/inventory/item_stack.h"
 #include "endstone/level/chunk.h"
@@ -118,7 +122,7 @@ public:
      *
      * @return Item entity created as a result of this method
      */
-    [[nodiscard]] virtual Item &dropItem(Location location, ItemStack &item) = 0;
+    [[nodiscard]] virtual Item &dropItem(Location location, const ItemStack &item) = 0;
 
     /**
      * @brief Creates an actor at the given Location

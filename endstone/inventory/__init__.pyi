@@ -10,6 +10,9 @@ from endstone.map import MapView
 from endstone.nbt import CompoundTag
 
 __all__ = [
+    "BookMeta",
+    "BookMetaGeneration",
+    "CrossbowMeta",
     "EquipmentSlot",
     "Inventory",
     "ItemFactory",
@@ -18,6 +21,7 @@ __all__ = [
     "ItemType",
     "MapMeta",
     "PlayerInventory",
+    "WritableBookMeta",
 ]
 
 class ItemStack:
@@ -77,17 +81,14 @@ class ItemStack:
         Set the ItemMeta of this ItemStack.
         """
         ...
-    def to_nbt(self) -> CompoundTag:
+    @property
+    def nbt(self) -> CompoundTag:
         """
-        Serializes this ItemStack into a Named Binary Tag (NBT).
-        """
-        ...
-    @staticmethod
-    def from_nbt(arg0: CompoundTag) -> ItemStack:
-        """
-        Deserializes an ItemStack from a Named Binary Tag (NBT).
+        Gets or sets the NBT compound tag of this item stack.
         """
         ...
+    @nbt.setter
+    def nbt(self, arg1: CompoundTag) -> None: ...
     def __eq__(self, arg0: ItemStack) -> bool: ...
     def __ne__(self, arg0: ItemStack) -> bool: ...
     def __str__(self) -> str: ...
@@ -135,6 +136,11 @@ class ItemType:
     def max_durability(self) -> int:
         """
         Gets the maximum durability of this item type
+        """
+        ...
+    def create_item_stack(self, amount: int = 1) -> ItemStack:
+        """
+        Constructs a new ItemStack with this item type.
         """
         ...
     @staticmethod
@@ -297,6 +303,117 @@ class MapMeta(ItemMeta):
     @map_view.setter
     def map_view(self, arg1: MapView) -> None: ...
 
+class WritableBookMeta(ItemMeta):
+    """
+    Represents the metadata for a writable book.
+    """
+    @property
+    def has_pages(self) -> bool:
+        """
+        Checks for the existence of pages in the book.
+        """
+        ...
+    def get_page(self, page: int) -> str:
+        """
+        Gets the specified page in the book.
+        """
+        ...
+    def set_page(self, page: int, data: str) -> None:
+        """
+        Sets the specified page in the book.
+        """
+        ...
+    @property
+    def pages(self) -> list[str]:
+        """
+        Gets or sets all the pages in the book.
+        """
+        ...
+    @pages.setter
+    def pages(self, arg1: list[str]) -> None: ...
+    def add_page(self, *args: str) -> None:
+        """
+        Adds new pages to the end of the book.
+        """
+        ...
+    @property
+    def page_count(self) -> int:
+        """
+        Gets the number of pages in the book.
+        """
+        ...
+
+class BookMetaGeneration(enum.Enum):
+    ORIGINAL = 0
+    COPY_OF_ORIGINAL = 1
+    COPY_OF_COPY = 2
+
+class BookMeta(WritableBookMeta):
+    """
+    Represents the metadata for a written book.
+    """
+    @property
+    def has_title(self) -> bool:
+        """
+        Checks for the existence of a title in the book.
+        """
+        ...
+    @property
+    def title(self) -> str:
+        """
+        Gets or sets the title of the book.
+        """
+        ...
+    @title.setter
+    def title(self, arg1: str | None) -> None: ...
+    @property
+    def has_author(self) -> bool:
+        """
+        Checks for the existence of an author in the book.
+        """
+        ...
+    @property
+    def author(self) -> str:
+        """
+        Gets or sets the author of the book.
+        """
+        ...
+    @author.setter
+    def author(self, arg1: str | None) -> None: ...
+    @property
+    def has_generation(self) -> bool:
+        """
+        Checks for the existence of generation level in the book.
+        """
+        ...
+    @property
+    def generation(self) -> BookMetaGeneration | None:
+        """
+        Gets or sets the generation of the book.
+        """
+        ...
+    @generation.setter
+    def generation(self, arg1: BookMetaGeneration | None) -> None: ...
+
+class CrossbowMeta(ItemMeta):
+    """
+    Represents the metadata for a crossbow.
+    """
+    @property
+    def has_charged_projectile(self) -> bool:
+        """
+        Returns whether the crossbow has a charged projectile.
+        """
+        ...
+    @property
+    def charged_projectile(self) -> ItemStack | None:
+        """
+        Gets or sets the charged projectile.
+        """
+        ...
+    @charged_projectile.setter
+    def charged_projectile(self, arg1: ItemStack | None) -> None: ...
+
 class ItemFactory:
     def get_item_meta(self, type: str) -> ItemMeta:
         """
@@ -318,11 +435,6 @@ class ItemFactory:
         Returns an appropriate item meta for the specified item type.
         """
         ...
-    def create_item_stack(self, tag: CompoundTag) -> ItemStack:
-        """
-        Create a new ItemStack given the NBT.
-        """
-        ...
 
 class Inventory:
     """
@@ -340,12 +452,12 @@ class Inventory:
         Returns the maximum stack size for an ItemStack in this inventory.
         """
         ...
-    def get_item(self, index: int) -> ItemStack:
+    def get_item(self, index: int) -> ItemStack | None:
         """
         Returns the ItemStack found in the slot at the given index
         """
         ...
-    def set_item(self, index: int, item: ItemStack) -> None:
+    def set_item(self, index: int, item: ItemStack | None) -> None:
         """
         Stores the ItemStack at the given index of the inventory.
         """
@@ -369,13 +481,13 @@ class Inventory:
         """
         ...
     @property
-    def contents(self) -> list[ItemStack]:
+    def contents(self) -> list[ItemStack | None]:
         """
         Returns all ItemStacks from the inventory
         """
         ...
     @contents.setter
-    def contents(self, arg1: list[ItemStack]) -> None: ...
+    def contents(self, arg1: list[ItemStack | None]) -> None: ...
     @typing.overload
     def contains(self, item: ItemStack, amount: int) -> bool:
         """
@@ -480,12 +592,12 @@ class Inventory:
         Returns the size of the inventory
         """
         ...
-    def __getitem__(self, index: int) -> ItemStack:
+    def __getitem__(self, index: int) -> ItemStack | None:
         """
         Returns the ItemStack found in the slot at the given index
         """
         ...
-    def __setitem__(self, index: int, item: ItemStack) -> None:
+    def __setitem__(self, index: int, item: ItemStack | None) -> None:
         """
         Stores the ItemStack at the given index of the inventory.
         """
@@ -508,53 +620,53 @@ class PlayerInventory(Inventory):
     Interface to the inventory of a Player, including the four armor slots and any extra slots.
     """
     @property
-    def helmet(self) -> ItemStack:
+    def helmet(self) -> ItemStack | None:
         """
         Gets or sets the ItemStack in the helmet slot
         """
         ...
     @helmet.setter
-    def helmet(self, arg1: ItemStack) -> None: ...
+    def helmet(self, arg1: ItemStack | None) -> None: ...
     @property
-    def chestplate(self) -> ItemStack:
+    def chestplate(self) -> ItemStack | None:
         """
         Gets or sets the ItemStack in the chestplate slot
         """
         ...
     @chestplate.setter
-    def chestplate(self, arg1: ItemStack) -> None: ...
+    def chestplate(self, arg1: ItemStack | None) -> None: ...
     @property
-    def leggings(self) -> ItemStack:
+    def leggings(self) -> ItemStack | None:
         """
         Gets or sets the ItemStack in the leg slot
         """
         ...
     @leggings.setter
-    def leggings(self, arg1: ItemStack) -> None: ...
+    def leggings(self, arg1: ItemStack | None) -> None: ...
     @property
-    def boots(self) -> ItemStack:
+    def boots(self) -> ItemStack | None:
         """
         Gets or sets the ItemStack in the boots slot
         """
         ...
     @boots.setter
-    def boots(self, arg1: ItemStack) -> None: ...
+    def boots(self, arg1: ItemStack | None) -> None: ...
     @property
-    def item_in_main_hand(self) -> ItemStack:
+    def item_in_main_hand(self) -> ItemStack | None:
         """
         Gets or sets the item the player is currently holding in their main hand.
         """
         ...
     @item_in_main_hand.setter
-    def item_in_main_hand(self, arg1: ItemStack) -> None: ...
+    def item_in_main_hand(self, arg1: ItemStack | None) -> None: ...
     @property
-    def item_in_off_hand(self) -> ItemStack:
+    def item_in_off_hand(self) -> ItemStack | None:
         """
         Gets or sets the item the player is currently holding in their off hand.
         """
         ...
     @item_in_off_hand.setter
-    def item_in_off_hand(self, arg1: ItemStack) -> None: ...
+    def item_in_off_hand(self, arg1: ItemStack | None) -> None: ...
     @property
     def held_item_slot(self) -> int:
         """

@@ -15,6 +15,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_set>
 #include <utility>
 
 #include "endstone/command/command_sender.h"
@@ -30,15 +31,10 @@ namespace endstone {
  */
 class BroadcastMessageEvent : public Cancellable<ServerEvent> {
 public:
+    ENDSTONE_EVENT(BroadcastMessageEvent);
     BroadcastMessageEvent(bool async, Message message, std::unordered_set<const CommandSender *> recipients)
         : Cancellable(async), message_(std::move(message)), recipients_(std::move(recipients))
     {
-    }
-
-    inline static const std::string NAME = "BroadcastMessageEvent";
-    [[nodiscard]] std::string getEventName() const override
-    {
-        return NAME;
     }
 
     /**
@@ -46,30 +42,21 @@ public:
      *
      * @return Message to broadcast
      */
-    [[nodiscard]] const Message &getMessage() const
-    {
-        return message_;
-    }
+    [[nodiscard]] const Message &getMessage() const { return message_; }
 
     /**
      * Set the message to broadcast.
      *
      * @param message New message to broadcast
      */
-    void setMessage(Message message)
-    {
-        message_ = std::move(message);
-    }
+    void setMessage(Message message) { message_ = std::move(message); }
 
     /**
      * Gets a set of recipients that this broadcast message will be displayed to.
      *
      * @return All CommandSenders who will see this broadcast message
      */
-    [[nodiscard]] const std::unordered_set<const CommandSender *> &getRecipients() const
-    {
-        return recipients_;
-    }
+    [[nodiscard]] const std::unordered_set<const CommandSender *> &getRecipients() const { return recipients_; }
 
 private:
     Message message_;

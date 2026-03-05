@@ -33,19 +33,7 @@ class AttributeModifier:
     """
     Represents an attribute modifier.
     """
-    def __init__(self, name: str, amount: float, operation: Operation, operand: Operand = Operand.VALUE) -> None: ...
-    class Operand(enum.Enum):
-        """
-        Value on which operation to be applied.
-        """
-
-        VALUE = 0
-        MAX_VALUE = 1
-        MIN_VALUE = 2
-
-    VALUE = Operand.VALUE
-    MAX_VALUE = Operand.MAX_VALUE
-    MIN_VALUE = Operand.MIN_VALUE
+    def __init__(self, name: str, amount: float, operation: Operation) -> None: ...
     class Operation(enum.Enum):
         """
         Operation to be applied.
@@ -86,12 +74,6 @@ class AttributeModifier:
         """
         ...
     @property
-    def operand(self) -> Operand:
-        """
-        Get the operand this modifier will apply.
-        """
-        ...
-    @property
     def operation(self) -> Operation:
         """
         Get the operation this modifier will apply.
@@ -117,37 +99,9 @@ class AttributeInstance:
     @base_value.setter
     def base_value(self, arg1: float) -> None: ...
     @property
-    def base_max_value(self) -> float:
-        """
-        Base max value of this instance before modifiers are applied.
-        """
-        ...
-    @base_max_value.setter
-    def base_max_value(self, arg1: float) -> None: ...
-    @property
-    def base_min_value(self) -> float:
-        """
-        Base min value of this instance before modifiers are applied.
-        """
-        ...
-    @base_min_value.setter
-    def base_min_value(self, arg1: float) -> None: ...
-    @property
     def value(self) -> float:
         """
         Get the value of this instance after all associated modifiers have been applied.
-        """
-        ...
-    @property
-    def max_value(self) -> float:
-        """
-        Get the max value of this instance after all associated modifiers have been applied.
-        """
-        ...
-    @property
-    def min_value(self) -> float:
-        """
-        Get the min value of this instance after all associated modifiers have been applied.
         """
         ...
     @property

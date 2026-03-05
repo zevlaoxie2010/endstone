@@ -14,6 +14,9 @@
 
 #pragma once
 
+#include <memory>
+#include <utility>
+
 #include "endstone/damage/damage_source.h"
 #include "endstone/event/actor/actor_event.h"
 #include "endstone/event/cancellable.h"
@@ -25,15 +28,10 @@ namespace endstone {
  */
 class ActorDamageEvent : public Cancellable<ActorEvent<Mob>> {
 public:
+    ENDSTONE_EVENT(ActorDamageEvent);
     ActorDamageEvent(Mob &actor, std::unique_ptr<DamageSource> damage_source, const float damage)
         : Cancellable(actor), damage_source_(std::move(damage_source)), damage_(damage)
     {
-    }
-
-    inline static const std::string NAME = "ActorDamageEvent";
-    [[nodiscard]] std::string getEventName() const override
-    {
-        return NAME;
     }
 
     /**
@@ -41,30 +39,21 @@ public:
      *
      * @return The raw amount of damage caused by the event
      */
-    [[nodiscard]] float getDamage() const
-    {
-        return damage_;
-    }
+    [[nodiscard]] float getDamage() const { return damage_; }
 
     /**
      * @brief Sets the raw amount of damage caused by the event.
      *
      * @param damage The raw amount of damage caused by the event
      */
-    void setDamage(const float damage)
-    {
-        damage_ = damage;
-    }
+    void setDamage(const float damage) { damage_ = damage; }
 
     /**
      * @brief Get the source of damage.
      *
      * @return a DamageSource detailing the source of the damage.
      */
-    [[nodiscard]] DamageSource &getDamageSource() const
-    {
-        return *damage_source_;
-    }
+    [[nodiscard]] DamageSource &getDamageSource() const { return *damage_source_; }
 
 private:
     std::unique_ptr<DamageSource> damage_source_;

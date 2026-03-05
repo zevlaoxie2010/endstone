@@ -11,12 +11,14 @@ add_library(endstone_runtime SHARED
         bedrock_hooks/console_input_reader.cpp
         bedrock_hooks/certificate.cpp
         bedrock_hooks/dedicated_server.cpp
+        bedrock_hooks/explosion.cpp
         bedrock_hooks/fire_block.cpp
-        bedrock_hooks/health_attribute_delegate.cpp
         bedrock_hooks/inventory_transaction.cpp
         bedrock_hooks/item.cpp
         bedrock_hooks/item_registry_manager.cpp
+        bedrock_hooks/leaves_block.cpp
         bedrock_hooks/level.cpp
+        bedrock_hooks/liquid_block.cpp
         bedrock_hooks/map_data_manager.cpp
         bedrock_hooks/minecraft_commands.cpp
         bedrock_hooks/mob.cpp
@@ -25,7 +27,6 @@ add_library(endstone_runtime SHARED
         bedrock_hooks/packet.cpp
         bedrock_hooks/piston_block_actor.cpp
         bedrock_hooks/player.cpp
-        bedrock_hooks/raknet_socket2.cpp
         bedrock_hooks/rak_peer_helper.cpp
         bedrock_hooks/repository_sources.cpp
         bedrock_hooks/resource_pack_repository.cpp
@@ -37,11 +38,11 @@ add_library(endstone_runtime SHARED
         bedrock_hooks/script_player_gameplay_handler.cpp
         bedrock_hooks/script_scripting_event_handler.cpp
         bedrock_hooks/script_server_network_event_handler.cpp
+        bedrock_hooks/server_instance.cpp
         bedrock_hooks/server_network_handler.cpp
         bedrock_hooks/server_player.cpp
         bedrock_hooks/server_player_movement_correction_system.cpp
-        bedrock_hooks/server_script_manager.cpp
-        bedrock_hooks/leaves_block.cpp
+        bedrock_hooks/weather_manager.cpp
         main.cpp
         hook.cpp
         vtable_hook.cpp
@@ -60,7 +61,7 @@ if (UNIX)
     find_package(libelf REQUIRED)
     target_link_libraries(endstone_runtime PRIVATE libelf::libelf)
     target_link_options(endstone_runtime PRIVATE -g -Wl,--no-undefined,--exclude-libs,ALL)
-    target_compile_options(endstone_runtime PRIVATE -O2 -DNDEBUG -g -fvisibility=hidden -fms-extensions)
+    target_compile_options(endstone_runtime PRIVATE -O2 -DNDEBUG -g -fvisibility=hidden -fms-extensions -fno-delete-null-pointer-checks)
     if (ENDSTONE_SEPARATE_DEBUG_INFO)
         add_custom_command(
                 TARGET endstone_runtime

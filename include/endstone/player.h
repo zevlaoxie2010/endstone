@@ -15,6 +15,9 @@
 #pragma once
 
 #include <chrono>
+#include <optional>
+#include <string>
+#include <string_view>
 #include <variant>
 
 #include "endstone/actor/mob.h"
@@ -23,6 +26,7 @@
 #include "endstone/form/modal_form.h"
 #include "endstone/game_mode.h"
 #include "endstone/inventory/player_inventory.h"
+#include "endstone/map/map_view.h"
 #include "endstone/offline_player.h"
 #include "endstone/scoreboard/scoreboard.h"
 #include "endstone/skin.h"
@@ -34,7 +38,7 @@ namespace endstone {
 /**
  * @brief Represents a player.
  */
-class Player : public Mob, public OfflinePlayer {
+class Player : public Mob {
 protected:
     using FormVariant = std::variant<MessageForm, ActionForm, ModalForm>;
 
@@ -45,6 +49,13 @@ public:
      * @return Player name or null if we have not seen a name for this player yet
      */
     [[nodiscard]] std::string getName() const override = 0;
+
+    /**
+     * @brief Returns the UUID of this player
+     *
+     * @return Player UUID
+     */
+    [[nodiscard]] virtual UUID getUniqueId() const = 0;
 
     /**
      * @brief Checks if this player is a server operator
@@ -467,6 +478,15 @@ public:
      * @param payload The payload of the packet to be transmitted.
      */
     virtual void sendPacket(int packet_id, std::string_view payload) const = 0;
+
+    /**
+     * @brief Render a map and send it to the player in its entirety.
+     *
+     * This may be used when streaming the map in the normal manner is not desirable.
+     *
+     * @param map The map to send
+     */
+    virtual void sendMap(MapView &map) = 0;
 };
 
 }  // namespace endstone

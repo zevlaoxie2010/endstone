@@ -27,21 +27,19 @@ const AttributeInstance &BaseAttributeMap::getInstance(std::uint32_t id_value) c
     if (it == instance_map_.end()) {
         throw std::runtime_error("Invalid attribute id.");
     }
-    return it->second;
+    return (*it).second;
 }
 
 void BaseAttributeMap::onAttributeModified(AttributeInstance const &instance)
 {
-    if (on_attribute_modified_) {
-        std::invoke(on_attribute_modified_, this, instance);
-    }
+    std::invoke(on_attribute_modified_, this, instance);
 }
 
-const AttributeInstance &BaseAttributeMap::getInstance(const HashedString &name) const
+const AttributeInstance *BaseAttributeMap::getInstance(const HashedString &name) const
 {
-    for (const auto &[id, instance] : instance_map_) {
+    for (const auto [id, instance] : instance_map_) {
         if (instance.attribute_->getName() == name) {
-            return instance;
+            return &instance;
         }
     }
     throw std::runtime_error("Attribute not found by name: " + name.getString());
@@ -49,7 +47,7 @@ const AttributeInstance &BaseAttributeMap::getInstance(const HashedString &name)
 
 MutableAttributeWithContext BaseAttributeMap::getMutableInstanceWithContext(const HashedString &name)
 {
-    for (auto &[id, instance] : instance_map_) {
+    for (auto [id, instance] : instance_map_) {
         if (instance.attribute_->getName() == name) {
             return {&instance, this};
         }
@@ -59,8 +57,8 @@ MutableAttributeWithContext BaseAttributeMap::getMutableInstanceWithContext(cons
 
 void BaseAttributeMap::_onAttributeModified(AttributeInstance const &instance)
 {
-    auto *attribute = instance.getAttribute();
-    if (!attribute) {
+    const auto *attribute = instance.getAttribute();
+    if (!attribute || !attribute->isClientSyncable()) {
         return;
     }
     dirty_attributes_.push_back({attribute->getIDValue()});

@@ -14,6 +14,9 @@
 
 #pragma once
 
+#include <optional>
+#include <utility>
+
 #include "endstone/event/player/player_event.h"
 
 namespace endstone {
@@ -35,20 +38,14 @@ public:
      *
      * @return Message to appear to other players on the server.
      */
-    [[nodiscard]] std::optional<Message> getQuitMessage() const
-    {
-        return quit_message_;
-    }
+    [[nodiscard]] std::optional<Message> getQuitMessage() const { return quit_message_; }
 
     /**
      * @brief Sets the quit message to send to all online players.
      *
      * @param message Message to appear to other players on the server.
      */
-    void setQuitMessage(std::optional<Message> message)
-    {
-        quit_message_ = std::move(message);
-    }
+    void setQuitMessage(std::optional<Message> message) { quit_message_ = std::move(message); }
 
 private:
     std::optional<Message> quit_message_;

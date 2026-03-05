@@ -14,6 +14,9 @@
 
 #pragma once
 
+#include <memory>
+#include <utility>
+
 #include "endstone/event/block/block_event.h"
 #include "endstone/event/cancellable.h"
 
@@ -27,27 +30,19 @@ namespace endstone {
  */
 class BlockBreakEvent : public Cancellable<BlockEvent> {
 public:
+    ENDSTONE_EVENT(BlockBreakEvent);
     explicit BlockBreakEvent(std::unique_ptr<Block> block, Player &player)
         : Cancellable(std::move(block)), player_(player)
     {
     }
     ~BlockBreakEvent() override = default;
 
-    inline static const std::string NAME = "BlockBreakEvent";
-    [[nodiscard]] std::string getEventName() const override
-    {
-        return NAME;
-    }
-
     /**
      * @brief Gets the Player that is breaking the block involved in this event.
      *
      * @return The Player that is breaking the block involved in this event
      */
-    [[nodiscard]] Player &getPlayer() const
-    {
-        return player_;
-    }
+    [[nodiscard]] Player &getPlayer() const { return player_; }
 
 private:
     Player &player_;

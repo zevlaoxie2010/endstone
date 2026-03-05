@@ -28,6 +28,10 @@ __all__ = [
     "BlockBreakEvent",
     "BlockCookEvent",
     "BlockEvent",
+    "BlockExplodeEvent",
+    "BlockFormEvent",
+    "BlockFromToEvent",
+    "BlockGrowEvent",
     "BlockPistonEvent",
     "BlockPistonExtendEvent",
     "BlockPistonRetractEvent",
@@ -325,6 +329,19 @@ class BlockBreakEvent(BlockEvent, Cancellable):
         """
         ...
 
+class BlockExplodeEvent(BlockEvent, Cancellable):
+    """
+    Called when a block explodes.
+    """
+    @property
+    def block_list(self) -> list[Block]:
+        """
+        Gets or sets the list of blocks that would have been removed or were removed from the explosion event.
+        """
+        ...
+    @block_list.setter
+    def block_list(self, arg1: list[Block]) -> None: ...
+
 class BlockCookEvent(BlockEvent, Cancellable):
     """
     Called when an ItemStack is successfully cooked in a block.
@@ -343,6 +360,36 @@ class BlockCookEvent(BlockEvent, Cancellable):
         ...
     @result.setter
     def result(self, arg1: ItemStack) -> None: ...
+
+class BlockGrowEvent(BlockEvent, Cancellable):
+    """
+    Called when a block grows naturally in the world.
+    If a Block Grow event is cancelled, the block will not grow.
+    """
+    @property
+    def new_state(self) -> BlockState:
+        """
+        Gets the state of the block where it will form or spread to.
+        """
+        ...
+
+class BlockFormEvent(BlockGrowEvent):
+    """
+    Called when a block is formed or spreads based on world conditions.
+    If a Block Form event is cancelled, the block will not be formed.
+    """
+
+class BlockFromToEvent(BlockEvent, Cancellable):
+    """
+    Represents events with a source block and a destination block, currently only applies to liquid (lava and water) and teleporting dragon eggs.
+    If a Block From To event is cancelled, the block will not move (the liquid will not flow).
+    """
+    @property
+    def to_block(self) -> Block:
+        """
+        Gets the faced Block.
+        """
+        ...
 
 class BlockPistonEvent(BlockEvent, Cancellable):
     """
@@ -376,15 +423,15 @@ class BlockPlaceEvent(BlockEvent, Cancellable):
         """
         ...
     @property
-    def block_placed_state(self) -> BlockState:
+    def block_placed(self) -> Block:
         """
-        Gets the BlockState for the block which was placed.
+        Gets the block placed.
         """
         ...
     @property
-    def block_replaced(self) -> Block:
+    def block_replaced_state(self) -> BlockState:
         """
-        Gets the block which was replaced.
+        Gets the BlockState for the block which was replaced.
         """
         ...
     @property
@@ -609,7 +656,7 @@ class PlayerInteractEvent(PlayerEvent, Cancellable):
         """
         ...
     @property
-    def item(self) -> ItemStack:
+    def item(self) -> ItemStack | None:
         """
         Returns the item in hand represented by this event
         """
@@ -657,7 +704,7 @@ class PlayerItemConsumeEvent(PlayerEvent, Cancellable):
     @property
     def item(self) -> ItemStack:
         """
-        Gets or sets the item that is being consumed.
+        Gets the item that is being consumed.
         """
         ...
     @property
@@ -979,15 +1026,9 @@ class ServerListPingEvent(ServerEvent, Cancellable):
     Called when a server ping is coming in.
     """
     @property
-    def remote_host(self) -> str:
+    def address(self) -> SocketAddress:
         """
-        Get the host the ping is coming from.
-        """
-        ...
-    @property
-    def remote_port(self) -> int:
-        """
-        Get the port the ping is coming from.
+        Get the address the ping is coming from.
         """
         ...
     @property

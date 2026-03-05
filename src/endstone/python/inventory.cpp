@@ -40,6 +40,8 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
                                "Gets the maximum amount of this item type that can be held in a stack.")
         .def_property_readonly("max_durability", &ItemType::getMaxDurability,
                                "Gets the maximum durability of this item type")
+        .def("create_item_stack", py::overload_cast<int>(&ItemType::createItemStack, py::const_), py::arg("amount") = 1,
+             "Constructs a new ItemStack with this item type.")
         .def_static("get", &ItemType::get, py::arg("name"), "Attempts to get the ItemType with the given name.",
                     py::return_value_policy::reference)
         .def("__str__", &ItemType::getId)
@@ -82,6 +84,51 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         .def_property("map_view", &MapMeta::getMapView, &MapMeta::setMapView, py::return_value_policy::reference,
                       "Gets or sets the map view that is associated with this map item.");
 
+    py::class_<WritableBookMeta, ItemMeta>(m, "WritableBookMeta", "Represents the metadata for a writable book.")
+        .def_property_readonly("has_pages", &WritableBookMeta::hasPages,
+                               "Checks for the existence of pages in the book.")
+        .def("get_page", &WritableBookMeta::getPage, py::arg("page"), "Gets the specified page in the book.")
+        .def("set_page", &WritableBookMeta::setPage, py::arg("page"), py::arg("data"),
+             "Sets the specified page in the book.")
+        .def_property(
+            "pages", &WritableBookMeta::getPages,
+            [](WritableBookMeta &self, std::vector<std::string> pages) { self.setPages(std::move(pages)); },
+            "Gets or sets all the pages in the book.")
+        .def(
+            "add_page",
+            [](WritableBookMeta &self, const py::Args<std::string> &pages) {
+                std::vector<std::string> vec;
+                vec.reserve(pages.size());
+                for (auto page : pages) {
+                    vec.push_back(page.cast<std::string>());
+                }
+                self.addPages(std::move(vec));
+            },
+            "Adds new pages to the end of the book.")
+        .def_property_readonly("page_count", &WritableBookMeta::getPageCount, "Gets the number of pages in the book.");
+
+    py::native_enum<BookMeta::Generation>(m, "BookMetaGeneration", "enum.Enum")
+        .value("ORIGINAL", BookMeta::Generation::Original)
+        .value("COPY_OF_ORIGINAL", BookMeta::Generation::CopyOfOriginal)
+        .value("COPY_OF_COPY", BookMeta::Generation::CopyOfCopy)
+        .finalize();
+
+    py::class_<BookMeta, WritableBookMeta>(m, "BookMeta", "Represents the metadata for a written book.")
+        .def_property_readonly("has_title", &BookMeta::hasTitle, "Checks for the existence of a title in the book.")
+        .def_property("title", &BookMeta::getTitle, &BookMeta::setTitle, "Gets or sets the title of the book.")
+        .def_property_readonly("has_author", &BookMeta::hasAuthor, "Checks for the existence of an author in the book.")
+        .def_property("author", &BookMeta::getAuthor, &BookMeta::setAuthor, "Gets or sets the author of the book.")
+        .def_property_readonly("has_generation", &BookMeta::hasGeneration,
+                               "Checks for the existence of generation level in the book.")
+        .def_property("generation", &BookMeta::getGeneration, &BookMeta::setGeneration,
+                      "Gets or sets the generation of the book.");
+
+    py::class_<CrossbowMeta, ItemMeta>(m, "CrossbowMeta", "Represents the metadata for a crossbow.")
+        .def_property_readonly("has_charged_projectile", &CrossbowMeta::hasChargedProjectile,
+                               "Returns whether the crossbow has a charged projectile.")
+        .def_property("charged_projectile", &CrossbowMeta::getChargedProjectile, &CrossbowMeta::setChargedProjectile,
+                      "Gets or sets the charged projectile.");
+
     py::class_<ItemFactory>(m, "ItemFactory")
         .def("get_item_meta", &ItemFactory::getItemMeta, py::arg("type"),
              "This creates a new item meta for the item type.")
@@ -91,9 +138,7 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         .def("equals", &ItemFactory::equals, py::arg("meta1"), py::arg("meta2"),
              "This method is used to compare two ItemMeta objects.")
         .def("as_meta_for", &ItemFactory::asMetaFor, py::arg("meta"), py::arg("type"),
-             "Returns an appropriate item meta for the specified item type.")
-        .def("create_item_stack", &ItemFactory::createItemStack, py::arg("tag"),
-             "Create a new ItemStack given the NBT.");
+             "Returns an appropriate item meta for the specified item type.");
 
     item_stack
         .def(py::init([](ItemTypeId type, const int amount, const int data) {
@@ -122,8 +167,8 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
              "Checks if the two stacks are equal, but does not consider stack size (amount).")
         .def_property_readonly("item_meta", &ItemStack::getItemMeta, "Gets a copy of the ItemMeta of this ItemStack.")
         .def("set_item_meta", &ItemStack::setItemMeta, py::arg("meta"), "Set the ItemMeta of this ItemStack.")
-        .def("to_nbt", &ItemStack::toNbt, "Serializes this ItemStack into a Named Binary Tag (NBT).")
-        .def_static("from_nbt", &ItemStack::fromNbt, "Deserializes an ItemStack from a Named Binary Tag (NBT).")
+        .def_property("nbt", &ItemStack::getNbt, &ItemStack::setNbt,
+                      "Gets or sets the NBT compound tag of this item stack.")
         .def(py::self == py::self)
         .def(py::self != py::self)
         .def("__str__", [](const ItemStack &self) { return fmt::format("{}", self); });
@@ -139,12 +184,12 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         .def(
             "add_item",
             [](Inventory &self, const py::args &item) {
-                std::vector<ItemStack *> items;
+                std::vector<ItemStack> items;
                 items.reserve(item.size());
                 for (auto obj : item) {
-                    items.push_back(&obj.cast<ItemStack &>());
+                    items.push_back(obj.cast<ItemStack>());
                 }
-                return self.addItem(items);
+                return self.addItem(std::move(items));
             },
             "Stores the given ItemStacks in the inventory.\n"
             "This will try to fill existing stacks and empty slots as well as it can.\n\n"
@@ -153,12 +198,12 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         .def(
             "remove_item",
             [](Inventory &self, const py::args &item) {
-                std::vector<ItemStack *> items;
+                std::vector<ItemStack> items;
                 items.reserve(item.size());
                 for (auto obj : item) {
-                    items.push_back(&obj.cast<ItemStack &>());
+                    items.push_back(obj.cast<ItemStack>());
                 }
-                return self.removeItem(items);
+                return self.removeItem(std::move(items));
             },
             "Removes the given ItemStacks from the inventory.\n"
             "It will try to remove 'as much as possible' from the types and amounts you give as arguments.\n\n"

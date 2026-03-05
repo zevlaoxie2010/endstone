@@ -15,6 +15,7 @@
 #pragma once
 
 #include <algorithm>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -31,7 +32,7 @@ namespace endstone {
  */
 class Permission {
 public:
-    static const PermissionDefault DefaultPermission = PermissionDefault::Operator;
+    static constexpr auto DefaultPermission = PermissionDefault::Operator;
 
     explicit Permission(std::string name, std::string description = "",
                         PermissionDefault default_value = DefaultPermission,
@@ -48,10 +49,7 @@ public:
      *
      * @return Fully qualified name
      */
-    [[nodiscard]] std::string getName() const
-    {
-        return name_;
-    }
+    [[nodiscard]] std::string getName() const { return name_; }
 
     /**
      * Gets the children of this permission.
@@ -59,20 +57,14 @@ public:
      *
      * @return Permission children
      */
-    std::unordered_map<std::string, bool> &getChildren()
-    {
-        return children_;
-    }
+    std::unordered_map<std::string, bool> &getChildren() { return children_; }
 
     /**
      * Gets the default value of this permission.
      *
      * @return Default value of this permission.
      */
-    [[nodiscard]] PermissionDefault getDefault() const
-    {
-        return default_value_;
-    }
+    [[nodiscard]] PermissionDefault getDefault() const { return default_value_; }
 
     /**
      * Sets the default value of this permission.
@@ -93,10 +85,7 @@ public:
      *
      * @return Brief description of this permission
      */
-    [[nodiscard]] std::string getDescription() const
-    {
-        return description_;
-    }
+    [[nodiscard]] std::string getDescription() const { return description_; }
 
     /**
      * Sets the description of this permission.
@@ -105,10 +94,7 @@ public:
      *
      * @param value The new description to set
      */
-    void setDescription(std::string value)
-    {
-        description_ = std::move(value);
-    }
+    void setDescription(std::string value) { description_ = std::move(value); }
 
     /**
      * Gets a set containing every Permissible that has this permission.
@@ -158,14 +144,11 @@ public:
         if (!plugin_manager_) {
             return nullptr;
         }
-
         std::transform(name.begin(), name.end(), name.begin(), [](unsigned char c) { return std::tolower(c); });
         auto *perm = plugin_manager_->getPermission(name);
-
         if (!perm) {
-            perm = plugin_manager_->addPermission(std::make_unique<Permission>(name));
+            perm = &plugin_manager_->addPermission(std::make_unique<Permission>(name));
         }
-
         addParent(*perm, value);
         return perm;
     }
@@ -182,10 +165,7 @@ public:
         perm.recalculatePermissibles();
     }
 
-    void init(PluginManager &plugin_manager)
-    {
-        plugin_manager_ = &plugin_manager;
-    }
+    void init(PluginManager &plugin_manager) { plugin_manager_ = &plugin_manager; }
 
 private:
     std::string name_;

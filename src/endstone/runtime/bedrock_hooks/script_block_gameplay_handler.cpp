@@ -14,16 +14,25 @@
 
 #include "bedrock/scripting/event_handlers/script_block_gameplay_handler.h"
 
+#include <optional>
+
+#include "bedrock/core/math/vec3.h"
 #include "bedrock/world/actor/actor.h"
 #include "endstone/block/block_face.h"
 #include "endstone/core/block/block_face.h"
 #include "endstone/core/block/block_state.h"
+#include "endstone/core/block/block_snapshot.h"
 #include "endstone/core/player.h"
 #include "endstone/event/actor/actor_explode_event.h"
 #include "endstone/event/block/block_break_event.h"
+#include "endstone/event/block/block_explode_event.h"
 #include "endstone/event/block/block_piston_event.h"
 #include "endstone/event/block/block_place_event.h"
 #include "endstone/runtime/vtable_hook.h"
+
+namespace endstone::runtime {
+const std::optional<Vec3> &getLastExplosionPos();
+}  // namespace endstone::runtime
 
 namespace {
 
@@ -45,13 +54,21 @@ bool handleEvent(const BlockTryPlaceByPlayerEvent &event)
     auto &dimension = endstone_player.getDimension();
     auto &block_source = player->getDimension().getBlockSourceFromMainChunkSource();
     const auto block_face = static_cast<endstone::BlockFace>(event.face);
-    auto block_placed =
-        std::make_unique<endstone::core::EndstoneBlockState>(dimension, event.pos, event.permutation_to_place);
-    auto block_replaced = endstone::core::EndstoneBlock::at(block_source, event.pos);
-    const auto opposite = endstone::core::EndstoneBlockFace::getOpposite(block_face);
-    auto block_against = block_replaced->getRelative(opposite);
 
-    endstone::BlockPlaceEvent e{std::move(block_placed), std::move(block_replaced), std::move(block_against),
+    // Create placed block as adapter wrapping the permutation state
+    auto placed_state =
+        std::make_unique<endstone::core::EndstoneBlockState>(dimension, event.pos, event.permutation_to_place);
+    auto block_placed = std::make_unique<endstone::core::EndstoneBlockSnapshot>(std::move(placed_state));
+
+    // Capture replaced block state from current world state
+    auto block_at_pos = endstone::core::EndstoneBlock::at(block_source, event.pos);
+    auto replaced_state = block_at_pos->captureState();
+
+    // block_against from the live world
+    const auto opposite = endstone::core::EndstoneBlockFace::getOpposite(block_face);
+    auto block_against = block_at_pos->getRelative(opposite);
+
+    endstone::BlockPlaceEvent e{std::move(block_placed), std::move(replaced_state), std::move(block_against),
                                 endstone_player};
     server.getPluginManager().callEvent(e);
     if (e.isCancelled()) {
@@ -86,7 +103,24 @@ bool handleEvent(ExplosionStartedEvent &event)
         }
     }
     else {
-        // TODO(event): BlockExplodeEvent
+        auto &block_source = event.dimension.getBlockSourceFromMainChunkSource();
+        const auto &pos = endstone::runtime::getLastExplosionPos();
+        if (!pos) {
+            server.getLogger().critical("BlockExplodeEvent: invalid explosion position");
+            return true;
+        }
+        endstone::BlockExplodeEvent e{endstone::core::EndstoneBlock::at(block_source, BlockPos(pos.value())),
+                                      std::move(block_list)};
+        server.getPluginManager().callEvent(e);
+        if (e.isCancelled()) {
+            return false;
+        }
+        event.blocks.clear();
+        for (const auto &block : e.getBlockList()) {
+            if (block) {
+                event.blocks.emplace(block->getX(), block->getY(), block->getZ());
+            }
+        }
     }
     return true;
 }

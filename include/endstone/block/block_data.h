@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -40,6 +41,13 @@ public:
      * @return the block type
      */
     [[nodiscard]] virtual std::string getType() const = 0;
+
+    /**
+     * @brief Get the translation key for this block.
+     *
+     * @return the translation key for this block
+     */
+    [[nodiscard]] virtual std::string getTranslationKey() const = 0;
 
     /**
      * @brief Gets the block states, which when passed into a method such as Server::createBlockData(type, block_states)

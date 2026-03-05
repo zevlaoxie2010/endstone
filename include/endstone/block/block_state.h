@@ -14,6 +14,9 @@
 
 #pragma once
 
+#include <memory>
+#include <string>
+
 #include <fmt/format.h>
 
 #include "endstone/block/block.h"
@@ -66,7 +69,7 @@ public:
      *
      * @param data New block specific data
      */
-    virtual void setData(const BlockData& data) = 0;
+    virtual void setData(const BlockData &data) = 0;
 
     /**
      * @brief Gets the dimension which contains the block represented by this block state.

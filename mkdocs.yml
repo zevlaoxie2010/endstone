@@ -43,12 +43,12 @@ plugins:
   - macros
   - mkdocstrings:
       enabled: !ENV [ CI, false ]
-      custom_templates: docs/templates
+      # custom_templates: docs/templates
       handlers:
         python:
           paths: [ python/src ]
           load_external_modules: true
-          import:
+          inventories:
             - https://docs.python.org/3/objects.inv
             - https://numpy.org/doc/stable/objects.inv
           options:
@@ -73,6 +73,8 @@ plugins:
             signature_crossrefs: true
             separate_signature: true
             modernize_annotations: true
+            show_overloads: true
+            overloads_only: true
             summary: true
             # griffe extensions
             extensions:

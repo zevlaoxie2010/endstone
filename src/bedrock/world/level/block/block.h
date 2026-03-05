@@ -71,6 +71,7 @@ public:
     const AABB &getVisualShape(AABB &buffer) const;
     const AABB &getUIShape(AABB &buffer) const;
     bool getLiquidClipVolume(BlockSource &region, BlockPos const &pos, AABB &include_box) const;
+    [[nodiscard]] bool isLavaBlocking() const;
     [[nodiscard]] bool requiresCorrectToolForDrops() const;
     [[nodiscard]] float getThickness() const;
     bool getSecondPart(const BlockSource &region, const BlockPos &pos, BlockPos &out) const;
@@ -131,4 +132,4 @@ private:
     BlockRuntimeId network_id_;                        // +300
     bool has_runtime_id_;                              //
 };
-BEDROCK_STATIC_ASSERT_SIZE(Block, 320, 328);
+BEDROCK_STATIC_ASSERT_SIZE(Block, 280, 288);

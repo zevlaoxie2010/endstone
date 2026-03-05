@@ -30,11 +30,14 @@
 #include "bedrock/world/game_session.h"
 #include "bedrock/world/minecraft.h"
 
+struct ServerInstanceInitArguments;
+
 class ServerInstance : public Bedrock::EnableNonOwnerReferences,
                        public AppPlatformListener,
                        public GameCallbacks,
                        public Core::StorageAreaStateListener {
 public:
+    ENDSTONE_HOOK bool initializeServer(ServerInstanceInitArguments &&args);
     ServerInstance(IMinecraftApp &, const Bedrock::NotNullNonOwnerPtr<ServerInstanceEventCoordinator> &);
     enum InstanceState : unsigned int {
         Running = 0,
@@ -56,8 +59,10 @@ public:
 
 private:
     friend class endstone::core::EndstoneServer;
-    IMinecraftApp &app_;
+    const bool is_dedicated_server_;
     std::unique_ptr<Minecraft> minecraft_;
+    std::unique_ptr<ProfilingManager> profiling_manager;
+    ServiceRegistrationToken<ProfilingManager> profiling_manager_service_registration_token_;
     std::unique_ptr<ServerNetworkSystem> network_;
     std::unique_ptr<LoopbackPacketSender> packet_sender_;
     std::unique_ptr<Timer> sim_timer_;
@@ -77,7 +82,7 @@ private:
     std::unique_ptr<ServerScriptManager> server_script_manager_;
     std::unique_ptr<Scripting::RegistryManager> script_registry_manager_;
     std::function<void(const char *)> script_watchdog_critical_error_callback_;
-    std::function<void(const char *, const char *)> unrecoverable_error_callback_;
+    std::function<void(Connection::DisconnectFailReason, const char *)> unrecoverable_error_callback_;
     bool handled_level_corruption_;
     std::unique_ptr<TextFilteringProcessor> text_filtering_processor_;
     std::chrono::microseconds wakeup_interval_;

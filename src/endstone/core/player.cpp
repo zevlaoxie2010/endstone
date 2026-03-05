@@ -19,6 +19,7 @@
 #include "bedrock/deps/raknet/rak_peer_interface.h"
 #include "bedrock/entity/components/user_entity_identifier_component.h"
 #include "bedrock/network/packet.h"
+#include "bedrock/network/packet/clientbound_map_item_data_packet.h"
 #include "bedrock/network/packet/emote_packet.h"
 #include "bedrock/network/packet/mob_equipment_packet.h"
 #include "bedrock/network/packet/modal_form_request_packet.h"
@@ -42,6 +43,7 @@
 #include "endstone/core/game_mode.h"
 #include "endstone/core/inventory/item_stack.h"
 #include "endstone/core/inventory/player_inventory.h"
+#include "endstone/core/map/map_view.h"
 #include "endstone/core/message.h"
 #include "endstone/core/network/data_packet.h"
 #include "endstone/core/server.h"
@@ -64,9 +66,6 @@ EndstonePlayer::EndstonePlayer(EndstoneServer &server, ::Player &player)
       inventory_(std::make_unique<EndstonePlayerInventory>(player)),
       ender_chest_(std::make_unique<EndstoneInventory>(*player.getEnderChestContainer()))
 {
-    const auto component = player.getPersistentComponent<UserEntityIdentifierComponent>();
-    uuid_ = EndstoneUUID::fromMinecraft(component->getClientUUID());
-    xuid_ = component->getXuid(false);
     last_op_status_ = EndstonePlayer::isOp();
 }
 
@@ -128,11 +127,11 @@ Player *EndstonePlayer::asPlayer() const
 void EndstonePlayer::sendMessage(const Message &message) const
 {
     std::visit(overloaded{[this](const std::string &msg) {
-                              auto packet = TextPacket::createRaw(msg);
+                              auto packet = TextPacketPayload::createRaw(msg);
                               getHandle().sendNetworkPacket(packet);
                           },
                           [this](const Translatable &msg) {
-                              auto packet = TextPacket::createTranslated(msg.getText(), msg.getParameters());
+                              auto packet = TextPacketPayload::createTranslated(msg.getText(), msg.getParameters());
                               getHandle().sendNetworkPacket(packet);
                           }},
                message);
@@ -184,7 +183,8 @@ bool EndstonePlayer::teleport(const Location &location)
 
 UUID EndstonePlayer::getUniqueId() const
 {
-    return uuid_;
+    const auto *component = getHandle().tryGetComponent<UserEntityIdentifierComponent>();
+    return EndstoneUUID::fromMinecraft(component->getClientUUID());
 }
 
 bool EndstonePlayer::isOp() const
@@ -205,7 +205,8 @@ void EndstonePlayer::setOp(bool value)
 
 std::string EndstonePlayer::getXuid() const
 {
-    return xuid_;
+    const auto *component = getHandle().tryGetComponent<UserEntityIdentifierComponent>();
+    return component->getXuid();
 }
 
 SocketAddress EndstonePlayer::getAddress() const
@@ -391,17 +392,13 @@ void EndstonePlayer::setScoreboard(Scoreboard &scoreboard)
 
 void EndstonePlayer::sendPopup(std::string message) const
 {
-    TextPacket packet;
-    packet.type = TextPacketType::Popup;
-    packet.message = std::move(message);
+    TextPacket packet = TextPacketPayload::createPopup(message, {});
     getHandle().sendNetworkPacket(packet);
 }
 
 void EndstonePlayer::sendTip(std::string message) const
 {
-    TextPacket packet;
-    packet.type = TextPacketType::Tip;
-    packet.message = std::move(message);
+    TextPacket packet = TextPacketPayload::createTip(message);
     getHandle().sendNetworkPacket(packet);
 }
 
@@ -505,7 +502,7 @@ void EndstonePlayer::updateCommands() const
     AvailableCommandsPacket packet = registry.serializeAvailableCommands();
 
     std::unordered_map<std::uint32_t, SemanticConstraint> constraints_to_remove;
-    for (auto it = packet.commands.begin(); it != packet.commands.end();) {
+    for (auto it = packet.payload.commands.begin(); it != packet.payload.commands.end();) {
         const auto &name = it->name;
         const auto command = command_map.getCommand(name);
         if (command && command->isRegistered() && command->testPermissionSilently(*static_cast<const Player *>(this))) {
@@ -522,13 +519,13 @@ void EndstonePlayer::updateCommands() const
             ++it;
         }
         else {
-            it = packet.commands.erase(it);
+            it = packet.payload.commands.erase(it);
         }
     }
 
     // Remove semantic constraints
     const auto enum_index = registry.findEnum("CommandName").toIndex();
-    for (auto &data : packet.constraints) {
+    for (auto &data : packet.payload.constraints) {
         if (constraints_to_remove.contains(data.enum_value_symbol) && data.enum_symbol == enum_index) {
             auto constraint = constraints_to_remove.at(data.enum_value_symbol);
             std::erase(data.constraints, registry.semantic_constraint_lookup_.at(constraint));
@@ -585,7 +582,11 @@ void EndstonePlayer::sendForm(FormVariant form)
     auto packet = MinecraftPackets::createPacket(MinecraftPacketIds::ShowModalForm);
     std::shared_ptr<ModalFormRequestPacket> pk = std::static_pointer_cast<ModalFormRequestPacket>(packet);
     pk->payload.form_id = ++form_ids_;
-    pk->payload.form_json = std::visit(overloaded{[](auto &&arg) { return FormCodec::toJson(arg); }}, form).dump();
+    pk->payload.form_json = std::visit(overloaded{[](auto &&arg) {
+                                           return FormCodec::toJson(arg);
+                                       }},
+                                       form)
+                                .dump();
     forms_.emplace(pk->payload.form_id, std::move(form));
     getHandle().sendNetworkPacket(*packet);
 }
@@ -601,6 +602,31 @@ void EndstonePlayer::sendPacket(int packet_id, std::string_view payload) const
 {
     DataPacket pk(packet_id, payload);
     getHandle().sendNetworkPacket(pk);
+}
+
+void EndstonePlayer::sendMap(MapView &map)
+{
+    auto &view = static_cast<EndstoneMapView &>(map);
+    auto packet = MinecraftPackets::createPacket(MinecraftPacketIds::MapData);
+    auto &pk = static_cast<ClientboundMapItemDataPacket &>(*packet);
+    pk.map_ids_.clear();
+    pk.map_ids_.emplace_back(view.map_.getMapId());
+    pk.scale_ = view.map_.getScale();
+    pk.start_x_ = 0;
+    pk.start_y_ = 0;
+    pk.map_origin_ = view.map_.getOrigin();
+    pk.dimension_ = view.map_.getDimensionId().runtime_id;
+    pk.width_ = MapConstants::MAP_SIZE;
+    pk.height_ = MapConstants::MAP_SIZE;
+    pk.type_ = ClientboundMapItemDataPacket::Type::TextureUpdate | ClientboundMapItemDataPacket::Type::DecorationUpdate;
+    pk.locked_ = view.map_.isLocked();
+
+    for (const auto &[unique_id, decoration] : view.map_.getDecorations()) {
+        pk.unique_ids_.emplace_back(unique_id);
+        pk.decorations_.emplace_back(decoration);
+    }
+    pk.map_pixels_.resize(pk.width_ * pk.height_);
+    getHandle().sendNetworkPacket(*packet);
 }
 
 bool EndstonePlayer::handlePacket(Packet &packet)
@@ -660,8 +686,7 @@ bool EndstonePlayer::handlePacket(Packet &packet)
             }
 
             skin_change_message = e.getSkinChangeMessage().value_or("");
-            if (server.getServer().getServerTextSettings()->getEnabledServerTextEvents().test(
-                    static_cast<std::underlying_type_t<ServerTextEvent>>(ServerTextEvent::PlayerChangedSkin)) &&
+            if (server.isServerTextEnabled(ServerTextEvent::PlayerChangedSkin) &&
                 (!std::holds_alternative<std::string>(skin_change_message) ||
                  !std::get<std::string>(skin_change_message).empty())) {
                 server.broadcastMessage(skin_change_message);
@@ -702,7 +727,7 @@ bool EndstonePlayer::handlePacket(Packet &packet)
                 PlayerInteractEvent e{
                     *this,
                     PlayerInteractEvent::Action::LeftClickBlock,
-                    item.get(),
+                    item,
                     block.get(),
                     static_cast<BlockFace>(action.facing),
                     Vector{action.pos.x, action.pos.y, action.pos.z},
@@ -810,8 +835,7 @@ void EndstonePlayer::doFirstSpawn()
     PlayerJoinEvent e{*this, join_message};
     server.getPluginManager().callEvent(e);
     join_message = e.getJoinMessage().value_or("");
-    if (server.getServer().getServerTextSettings()->getEnabledServerTextEvents().test(
-            static_cast<std::underlying_type_t<ServerTextEvent>>(ServerTextEvent::PlayerConnection)) &&
+    if (server.isServerTextEnabled(ServerTextEvent::PlayerConnection) &&
         (!std::holds_alternative<std::string>(join_message) || !std::get<std::string>(join_message).empty())) {
         server.broadcastMessage(join_message);
     }
@@ -891,6 +915,7 @@ void EndstonePlayer::updateAbilities() const
 
 void EndstonePlayer::checkOpStatus()
 {
+    // TODO(fixme): replace me with client_player_permissions_publisher in PermissionsHandler
     if (last_op_status_ != isOp()) {
         recalculatePermissions();
         updateCommands();

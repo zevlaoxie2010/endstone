@@ -16,20 +16,19 @@
 
 #include <utility>
 
+#include "endstone/detail.h"
 #include "endstone/endstone.hpp"
 #include "registry.h"
 #include "type_caster.h"
 
-namespace py = pybind11;
-
 namespace endstone::python {
-void init_actor(py::module_ &, py::class_<Actor, CommandSender> &actor, py::class_<Mob, Actor> &mob);
+void init_actor(py::module_ &, py_class<Actor> &actor, py_class<Mob> &mob);
 void init_attribute(py::module_ &);
 void init_ban(py::module_ &);
 void init_block(py::module_ &, py::class_<Block> &block);
 void init_boss(py::module_ &);
 void init_color_format(py::module_ &);
-void init_command(py::module &, py::class_<CommandSender, Permissible> &command_sender);
+void init_command(py::module &, py_class<CommandSender> &command_sender);
 void init_damage(py::module_ &);
 void init_effect(py::module_ &);
 void init_enchantments(py::module_ &);
@@ -43,9 +42,8 @@ void init_level(py::module_ &, py::class_<Level> &level, py::class_<Dimension> &
 void init_logger(py::module_ &);
 void init_map(py::module_ &);
 void init_nbt(py::module_ &);
-void init_permissions(py::module_ &, py::class_<Permissible> &permissible, py::class_<Permission> &permission);
-void init_player(py::module_ &, py::class_<OfflinePlayer> &offline_player,
-                 py::class_<Player, Mob, OfflinePlayer> &player);
+void init_permissions(py::module_ &, py_class<Permissible> &permissible, py::class_<Permission> &permission);
+void init_player(py::module_ &, py_class<Player> &player);
 void init_plugin(py::module_ &);
 void init_potion(py::module_ &);
 void init_registry(py::module_ &);
@@ -126,23 +124,24 @@ PYBIND11_MODULE(_python, m)  // NOLINT(*-use-anonymous-namespace)
     // Forward declaration, see:
     // https://pybind11.readthedocs.io/en/stable/advanced/misc.html#avoiding-c-types-in-docstrings
     auto event = py::class_<Event>(m_event, "Event", "Represents an event.");
-    auto permissible = py::class_<Permissible>(
+    auto permissible = py_class<Permissible>(
         m_permissions, "Permissible",
         "Represents an object that may become a server operator and can be assigned permissions.");
     auto permission = py::class_<Permission>(m_permissions, "Permission",
                                              "Represents a unique permission that may be attached to a Permissible");
     auto server = py::class_<Server>(m, "Server", "Represents a server implementation.");
     auto block = py::class_<Block>(m_block, "Block", "Represents a block.");
-    auto command_sender =
-        py::class_<CommandSender, Permissible>(m_command, "CommandSender", "Represents a command sender.");
-    auto actor = py::class_<Actor, CommandSender>(m_actor, "Actor", "Represents a base actor in the level.");
-    auto mob = py::class_<Mob, Actor>(m_actor, "Mob",
-                                      "Represents a mobile entity (i.e. living entity), such as a monster or player.");
-    auto offline_player = py::class_<OfflinePlayer>(
+    auto command_sender = py_class<CommandSender>(m_command, "CommandSender", "Represents a command sender.");
+    auto actor = py_class<Actor>(m_actor, "Actor", "Represents a base actor in the level.");
+    auto mob = py_class<Mob>(m_actor, "Mob",
+                      "Represents a mobile entity (i.e. living entity), such as a monster or player.");
+    py::class_<OfflinePlayer>(
         m, "OfflinePlayer",
         "Represents a reference to a player identity and the data belonging to a player that is stored on the disk and "
-        "can, thus, be retrieved without the player needing to be online.");
-    auto player = py::class_<Player, Mob, OfflinePlayer>(m, "Player", "Represents a player.");
+        "can, thus, be retrieved without the player needing to be online.")
+        .def_property_readonly("name", &OfflinePlayer::getName, "Returns the name of this player")
+        .def_property_readonly("unique_id", &OfflinePlayer::getUniqueId, "Returns the UUID of this player");
+    auto player = py_class<Player>(m, "Player", "Represents a player.");
     auto item_stack = py::class_<ItemStack>(m_inventory, "ItemStack", "Represents a stack of items.");
     auto level = py::class_<Level>(m_level, "Level");
     auto dimension = py::class_<Dimension>(m_level, "Dimension", "Represents a dimension within a Level.");
@@ -169,7 +168,7 @@ PYBIND11_MODULE(_python, m)  // NOLINT(*-use-anonymous-namespace)
     init_block(m_block, block);
     init_actor(m_actor, actor, mob);
     init_level(m_level, level, dimension, location);
-    init_player(m, offline_player, player);
+    init_player(m, player);
     init_boss(m_boss);
     init_command(m_command, command_sender);
     init_plugin(m_plugin);
@@ -178,6 +177,8 @@ PYBIND11_MODULE(_python, m)  // NOLINT(*-use-anonymous-namespace)
     init_registry(m);
     init_server(server);
     init_event(m_event, event);
+
+    m.attr("__minecraft_version__") = MINECRAFT_VERSION;
 }
 
 void init_color_format(py::module_ &m)
@@ -374,8 +375,7 @@ void init_server(py::class_<Server> &server)
              py::arg("dimension"), py::return_value_policy::reference);
 }
 
-void init_player(py::module_ &m, py::class_<OfflinePlayer> &offline_player,
-                 py::class_<Player, Mob, OfflinePlayer> &player)
+void init_player(py::module_ &m, py_class<Player> &player)
 {
     py::class_<Skin>(m, "Skin", "Represents a player skin.")
         .def(py::init<std::string, Image, std::optional<std::string>, std::optional<Image>>(), py::arg("id"),
@@ -386,12 +386,8 @@ void init_player(py::module_ &m, py::class_<OfflinePlayer> &offline_player,
         .def_property_readonly("cape_image", &Skin::getCapeImage, "Get the Cape image.",
                                py::return_value_policy::reference);
 
-    offline_player  //
-        .def_property_readonly("name", &OfflinePlayer::getName, "Returns the name of this player")
-        .def_property_readonly("unique_id", &OfflinePlayer::getUniqueId, "Returns the UUID of this player");
-
     player  //
-        .def_property_readonly("name", &OfflinePlayer::getName, "Returns the name of this player")
+        .def_property_readonly("name", &Player::getName, "Returns the name of this player")
         .def_property_readonly("unique_id", &Player::getUniqueId, "Returns the UUID of this player")
         .def_property("is_op", &Player::isOp, &Player::setOp, "The operator status of this playerall")
         .def_property_readonly("xuid", &Player::getXuid, "Returns the Xbox User ID (XUID) of this player")
@@ -465,6 +461,9 @@ void init_player(py::module_ &m, py::class_<OfflinePlayer> &offline_player,
         .def_property_readonly("skin", &Player::getSkin, "Get the player's skin.")
         .def("send_form", &Player::sendForm, "Sends a form to the player.", py::arg("form"))
         .def("close_form", &Player::closeForm, "Closes the forms that are currently open for the player.")
+        .def("send_map", &Player::sendMap, py::arg("map"),
+             "Render a map and send it to the player in its entirety.\n\n"
+             "This may be used when streaming the map in the normal manner is not desirable.")
         .def(
             "send_packet",
             [](const Player &self, const int packet_id, const py::bytes &payload) {

@@ -14,6 +14,9 @@
 
 #pragma once
 
+#include <cstdint>
+#include <optional>
+
 #include "endstone/actor/actor.h"
 #include "endstone/inventory/item_stack.h"
 
@@ -28,7 +31,7 @@ public:
      *
      * @return An item stack.
      */
-    [[nodiscard]] virtual std::unique_ptr<ItemStack> getItemStack() const = 0;
+    [[nodiscard]] virtual ItemStack getItemStack() const = 0;
 
     /**
      * @brief Sets the item stack associated with this item drop.

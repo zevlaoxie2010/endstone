@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include "endstone/inventory/meta/item_meta.h"
 #include "item_type.h"
 
@@ -61,14 +63,5 @@ public:
      * @return An appropriate item meta for the specified item type.
      */
     [[nodiscard]] virtual std::unique_ptr<ItemMeta> asMetaFor(const ItemMeta *meta, ItemTypeId type) const = 0;
-
-    /**
-     * Create a new ItemStack given the NBT.
-     *
-     * @param tag the item NBT
-     *
-     * @return the created ItemStack, or nullptr if the input NBT was invalid
-     */
-    [[nodiscard]] virtual std::unique_ptr<ItemStack> createItemStack(const CompoundTag &tag) const = 0;
 };
 }  // namespace endstone

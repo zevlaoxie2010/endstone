@@ -14,9 +14,13 @@
 
 #pragma once
 
+#include <optional>
+#include <utility>
+
 #include "endstone/block/block_face.h"
 #include "endstone/event/cancellable.h"
 #include "endstone/event/player/player_event.h"
+#include "endstone/inventory/item_stack.h"
 
 namespace endstone {
 
@@ -25,6 +29,8 @@ namespace endstone {
  */
 class PlayerInteractEvent : public Cancellable<PlayerEvent> {
 public:
+    ENDSTONE_EVENT(PlayerInteractEvent);
+
     enum class Action {
         /**
          * Left-clicking a block
@@ -44,12 +50,10 @@ public:
         RightClickAir,
     };
 
-    ENDSTONE_EVENT(PlayerInteractEvent);
-
-    PlayerInteractEvent(Player &player, Action action, ItemStack *item, Block *block_clicked, BlockFace block_face,
-                        const std::optional<Vector> &clicked_position)
-        : Cancellable(player), action_(action), item_(item), block_clicked_(block_clicked), block_face_(block_face),
-          clicked_position_(clicked_position)
+    PlayerInteractEvent(Player &player, Action action, std::optional<ItemStack> item, Block *block_clicked,
+                        BlockFace block_face, std::optional<Vector> clicked_position)
+        : Cancellable(player), action_(action), item_(std::move(item)), block_clicked_(block_clicked),
+          block_face_(block_face), clicked_position_(std::move(clicked_position))
     {
     }
 
@@ -58,60 +62,42 @@ public:
      *
      * @return Action returns the type of interaction
      */
-    [[nodiscard]] Action getAction() const
-    {
-        return action_;
-    }
+    [[nodiscard]] Action getAction() const { return action_; }
 
     /**
      * @brief Check if this event involved an item
      *
      * @return boolean true if it did
      */
-    [[nodiscard]] bool hasItem() const
-    {
-        return item_ != nullptr;
-    }
+    [[nodiscard]] bool hasItem() const { return item_.has_value(); }
 
     /**
      * @brief Returns the item in hand represented by this event
      *
-     * @return ItemStack the item used
+     * @return ItemStack the item used, or std::nullopt if no item
      */
-    [[nodiscard]] ItemStack *getItem() const
-    {
-        return item_;
-    }
+    [[nodiscard]] const std::optional<ItemStack> &getItem() const { return item_; }
 
     /**
      * @brief Check if this event involved a block
      *
      * @return boolean true if it did
      */
-    [[nodiscard]] bool hasBlock() const
-    {
-        return block_clicked_ != nullptr;
-    }
+    [[nodiscard]] bool hasBlock() const { return block_clicked_ != nullptr; }
 
     /**
      * @brief Returns the clicked block
      *
      * @return Block returns the block clicked with this item.
      */
-    [[nodiscard]] Block *getBlock() const
-    {
-        return block_clicked_;
-    }
+    [[nodiscard]] Block *getBlock() const { return block_clicked_; }
 
     /**
      * @brief Returns the face of the block that was clicked
      *
      * @return BlockFace returns the face of the block that was clicked
      */
-    [[nodiscard]] BlockFace getBlockFace() const
-    {
-        return block_face_;
-    }
+    [[nodiscard]] BlockFace getBlockFace() const { return block_face_; }
 
     /**
      * @brief Gets the exact position on the block the player interacted with.
@@ -121,13 +107,10 @@ public:
      *
      * @return the clicked position.
      */
-    [[nodiscard]] std::optional<Vector> getClickedPosition() const
-    {
-        return clicked_position_;
-    }
+    [[nodiscard]] std::optional<Vector> getClickedPosition() const { return clicked_position_; }
 
 private:
-    ItemStack *item_;
+    std::optional<ItemStack> item_;
     Action action_;
     Block *block_clicked_;
     BlockFace block_face_;

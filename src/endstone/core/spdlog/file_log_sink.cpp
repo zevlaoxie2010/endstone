@@ -14,7 +14,11 @@
 
 #include "endstone/core/spdlog/file_log_sink.h"
 
+#include <fstream>
+#include <zstr.hpp>
+
 #include <fmt/chrono.h>
+#include <fmt/color.h>
 #include <fmt/format.h>
 #include <spdlog/details/os.h>
 #include <spdlog/pattern_formatter.h>
@@ -40,10 +44,12 @@ FileLogSink::FileLogSink(spdlog::filename_t base_filename, spdlog::filename_t fi
     }
     rotation_tp_ = nextRotation();
 
-    auto *formatter = static_cast<spdlog::pattern_formatter *>(formatter_.get());
-    formatter->add_flag<LevelFormatter>('L');
-    formatter->add_flag<TextFormatter>('v', false);
-    formatter->set_pattern("%^[%Y-%m-%d %H:%M:%S.%e %L] [%n] %v%$");
+    for (auto &formatter : formatters_) {
+        formatter.add_flag<LevelFormatter>('L');
+        formatter.add_flag<TextFormatter>('v', false);
+    }
+    formatters_[0].set_pattern("%^[%H:%M:%S] [%t/%L]: [%n] %v%$");
+    formatters_[1].set_pattern("%^[%H:%M:%S] [%t/%L]: %v%$");
 }
 
 spdlog::filename_t FileLogSink::filename()
@@ -71,7 +77,8 @@ void FileLogSink::sink_it_(const spdlog::details::log_msg &msg)
     }
 
     spdlog::memory_buf_t formatted;
-    formatter_->format(msg, formatted);
+    auto &formatter = msg.logger_name.size() > 0 ? formatters_[0] : formatters_[1];
+    formatter.format(msg, formatted);
     file_helper_.write(formatted);
 }
 
@@ -92,17 +99,18 @@ void FileLogSink::rotate()
             continue;
         }
         spdlog::filename_t target = calcFilename(base_filename_, file_pattern_, i);
-
-        if (!rename(src, target)) {
+        auto func = (i == 1) ? compress : rename;
+        if (!func(src, target)) {
             // if failed try again after a small delay.
             spdlog::details::os::sleep_for_millis(100);
-            if (!rename(src, target)) {
-                spdlog::throw_spdlog_ex(
-                    "FileLogSink: failed renaming " + filename_to_str(src) + " to " + filename_to_str(target), errno);
+            if (!func(src, target)) {
+                fmt::print(fmt::fg(fmt::color::red), "FileLogSink: failed rotating {} to {}\n", filename_to_str(src),
+                           filename_to_str(target));
+                break;
             }
         }
     }
-    file_helper_.reopen(true);
+    file_helper_.reopen(false);
 }
 
 std::tm FileLogSink::localtime(spdlog::log_clock::time_point tp)
@@ -129,6 +137,29 @@ bool FileLogSink::rename(const spdlog::filename_t &src_filename, const spdlog::f
 {
     (void)spdlog::details::os::remove(target_filename);
     return spdlog::details::os::rename(src_filename, target_filename) == 0;
+}
+
+bool FileLogSink::compress(const spdlog::filename_t &src_filename, const spdlog::filename_t &target_filename)
+{
+    try {
+        (void)spdlog::details::os::remove(target_filename);
+        std::ifstream input(src_filename, std::ios::in | std::ios::binary);
+        if (!input) {
+            return false;
+        }
+        zstr::ofstream output(target_filename, std::ios::out | std::ios::binary);
+        if (!output) {
+            return false;
+        }
+        output << input.rdbuf();
+        output.flush();
+        output.close();
+        input.close();
+        return spdlog::details::os::remove(src_filename) == 0;
+    }
+    catch (...) {
+        return false;
+    }
 }
 
 }  // namespace endstone::core

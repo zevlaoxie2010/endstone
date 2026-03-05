@@ -14,7 +14,11 @@
 
 #pragma once
 
+#include <algorithm>
+#include <cstddef>
+#include <cstring>
 #include <string>
+#include <vector>
 
 #include "endstone/util/color.h"
 #include "endstone/util/result.h"
@@ -73,20 +77,14 @@ public:
      *
      * @return Image width in pixels
      */
-    [[nodiscard]] int getWidth() const
-    {
-        return width_;
-    }
+    [[nodiscard]] int getWidth() const { return width_; }
 
     /**
      * @brief Get the image height.
      *
      * @return Image height in pixels
      */
-    [[nodiscard]] int getHeight() const
-    {
-        return height_;
-    }
+    [[nodiscard]] int getHeight() const { return height_; }
 
     /**
      * @brief Get the image depth.
@@ -174,10 +172,7 @@ public:
      *
      * @return The underlying image data buffer
      */
-    [[nodiscard]] std::string_view getData() const
-    {
-        return data_;
-    }
+    [[nodiscard]] std::string_view getData() const { return data_; }
 
     /**
      * @brief Creates an image from the pixel data in a byte array.

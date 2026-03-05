@@ -5,13 +5,162 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [0.10.15](https://github.com/EndstoneMC/endstone/releases/tag/v0.10.15) - 2025-11-21
+## [Unreleased](https://github.com/EndstoneMC/endstone/compare/v0.11.1...HEAD)
 
-<small>[Compare with 0.10.1](https://github.com/EndstoneMC/endstone/compare/v0.10.14...v0.10.15)</small>
+<small>[Compare with 0.11.1](https://github.com/EndstoneMC/endstone/compare/v0.11.1...HEAD)</small>
 
 ### Added
 
-* Added support for BDS version 1.21.124.2.
+- Added support for BDS version 1.26.3.1.
+- Added `BlockExplodeEvent` for non-actor explosions (e.g., bed in the Nether, respawn anchor in the Overworld).
+- Added `Player.send_map()` method for sending full map data to players, enabling custom map renderers to push updates
+  on demand (e.g., animated maps via the scheduler).
+
+### Fixed
+
+- Fixed a crash caused by vulnerabilities introduced in Mojang's RakNet modifications (MCPE-228407).
+- Fixed missing exports for `BlockFormEvent`, `BlockFromToEvent`, and `BlockGrowEvent` events.
+
+## [0.11.1](https://github.com/EndstoneMC/endstone/releases/tag/v0.11.1) - 2026-02-20
+
+<small>[Compare with 0.11.0](https://github.com/EndstoneMC/endstone/compare/v0.11.0...v0.11.1)</small>
+
+### Added
+
+- Added support for BDS version 1.26.1.1.
+- Added `ListTag.to_list()` and `CompoundTag.to_dict()` methods (Python) that recursively convert NBT tag trees to
+  native Python data structures (`list` and `dict`).
+- Exported `attribute`, `effect`, `nbt`, and `potion` submodules from the top-level `endstone` Python package.
+- Added explicit standard library `#include` directives across all public C++ API headers for self-contained
+  compilation.
+
+### Fixed
+
+- Fixed `PlayerMoveEvent` and `PlayerJumpEvent` not firing.
+- Fixed `WeatherChangeEvent` and `ThunderChangeEvent` not firing.
+- Fixed `ServerListPingEvent` not firing.
+- Fixed `Enchantment` objects being unhashable, preventing their use as dictionary keys and in sets.
+- Fixed a duplicate keyword argument error when loading Python plugins that define a `name` class attribute.
+- Fixed several issues that caused the Map API to not work correctly in some occasions. Maps now behave consistently
+  across different platforms.
+
+### Changed
+
+- **BREAKING**: `ServerListPingEvent.remote_host` and `ServerListPingEvent.remote_port` properties have been replaced by
+  a single `ServerListPingEvent.address` property that returns a `SocketAddress`.
+
+## [0.11.0](https://github.com/EndstoneMC/endstone/releases/tag/v0.11.0) - 2026-02-13
+
+<small>[Compare with 0.10.18](https://github.com/EndstoneMC/endstone/compare/v0.10.18...v0.11.0)</small>
+
+### Added
+
+- Added support for BDS 1.26.0.
+- **NBT API**: Plugins can now read, create, and manipulate NBT data directly. All 11 standard tag types are supported (
+  `ByteTag` through `CompoundTag`), with full Python bindings. `CompoundTag` works like a dictionary and `ListTag` like
+  a list. Tags can be printed in SNBT format for debugging.
+- **ItemStack NBT access**: Read and write NBT data on items using `ItemStack.nbt` (Python) / `ItemStack::getNbt()` and
+  `ItemStack::setNbt()` (C++). Useful for inspecting or modifying item data directly.
+- **Enchantment API**: All 33 vanilla enchantments are available as named constants. Plugins can check max level,
+  conflicts between enchantments, and whether an enchantment can be applied to a given item. Accessible via the new
+  Registry system.
+- **Map API**: Plugins can now create and customise in-game maps. Draw pixels and images on the map canvas, add map
+  cursors (24 types including Player, Mansion, Monument, and TrialChambers), control scale and center position, and
+  listen for `MapInitializeEvent` when a new map is created.
+- **New events**:
+    - `BlockFromToEvent`: fires on liquid flow teleportation. Cancellable.
+    - `PlayerPortalEvent`: fires when a player enters a portal, with access to source and destination locations.
+      Cancellable.
+    - `PlayerDimensionChangeEvent`: fires when a player moves between dimensions (Overworld, Nether, The End).
+- **New ItemMeta types**:
+    - `BookMeta`: read and write signed book title, author, generation, and pages.
+    - `WritableBookMeta`: manage book-and-quill pages.
+    - `CrossbowMeta`: inspect and modify loaded crossbow projectiles.
+- **Command system**: Commands can now accept entity type arguments with tab completion via the new `entity_type`
+  parameter type.
+- **Dimension API**: `Dimension.spawn_actor()` creates an entity at a given location. `Dimension.drop_item()` drops an
+  item on the ground as a collectible entity.
+- **Mob API**: `Mob.max_health` is now writable, allowing plugins to change a mob's maximum health.
+- **Interactive console**: New console experience with persistent command history across server restarts. Enabled by
+  default on Windows, disabled on Linux. Use `--interactive` / `--no-interactive` CLI flags to override, or set the
+  `ENDSTONE_USE_INTERACTIVE_CONSOLE` environment variable.
+- **Crash reports**: Server crashes now automatically save a report to `crash_reports/` with cleaned-up stack traces for
+  easier debugging.
+- **`endstone.asyncio` module**: Run async code from plugins using a background event loop. Call `submit(coro)` to
+  schedule a coroutine and get a `Future` back, without blocking the server thread.
+- **Registry system**: A unified way to look up game objects (e.g., enchantments) by their identifier. Supports lookup,
+  existence checks, and iteration.
+- **BossBar**: Added `CREATE_FOG` flag to control whether a boss bar creates fog effects for players.
+- **Logging**: Rotated log files are now gzip-compressed to save disk space.
+- **`endstone.metrics` module**: Built-in [bStats](https://bstats.org) integration for plugin analytics. Create a
+  `Metrics` instance with your plugin and service ID to start reporting. Includes 8 chart types: `SimplePie`,
+  `AdvancedPie`, `DrilldownPie`, `SingleLineChart`, `MultiLineChart`, `SimpleBarChart`, `AdvancedBarChart`, and
+  `CustomChart`. Data is submitted asynchronously via `endstone.asyncio`.
+- **`ItemStack.translation_key`** property for getting an item's localisation key.
+- Added support for Python 3.14.
+
+### Changed
+
+- **BREAKING**: `NamespacedKey` has been replaced by `Identifier<T>`, a type-safe template that parses `"namespace:key"`
+  strings and defaults to the `"minecraft"` namespace. C++ plugins must update all references. In Python, identifiers
+  are simply strings.
+- **BREAKING**: `Result<T>` has been removed. API methods now return values directly and throw exceptions on invalid
+  input via `Preconditions` checks. These exceptions signal programming errors (e.g., passing invalid arguments).
+  Affected areas include health, distance calculations, boss bar progress, colour construction, and scoreboard
+  operations. Python plugins are unaffected.
+- **BREAKING**: Dimension argument reordered and made optional in several APIs. Call sites may need updating.
+- Health methods (`get_health`, `set_health`, `get_max_health`, `set_max_health`) moved from `Actor` to `Mob`, since
+  only mobs have health.
+- `PlayerDeathEvent` now extends `ActorDeathEvent` instead of `PlayerEvent`.
+- Default config file renamed from `endstone.toml` to `endstone.default.toml`.
+- Enchantment APIs now use typed `EnchantmentId` constants instead of raw strings.
+- Dropped Python 3.9 support (end-of-life). Minimum version is now Python 3.10.
+- Crash stack traces now filter out noise (CRT/runtime frames) and show demangled symbol names.
+- Suppressed verbose BDS content logs and database auto-compaction messages to reduce log clutter.
+
+### Fixed
+
+- Fixed log files not reopening properly after rotation, which could cause logs to be written to stale files.
+- Fixed Python interpreter not being found reliably in multi-Python environments.
+- Fixed a crash on server shutdown caused by C++ destructors running after the Python interpreter was already torn down.
+- Fixed plugin loading failing in environments where `pip` is not available (such as `uv`), since `pip` is used at
+  runtime to install plugins from file.
+
+## [0.10.18](https://github.com/EndstoneMC/endstone/releases/tag/v0.10.18) - 2025-12-11
+
+<small>[Compare with 0.10.17](https://github.com/EndstoneMC/endstone/compare/v0.10.17...v0.10.18)</small>
+
+### Fixed
+
+- Patched a new vulnerability in BDS where a bad LoginPacket could crash the server (well done mojang, well done).
+
+## [0.10.17](https://github.com/EndstoneMC/endstone/releases/tag/v0.10.17) - 2025-12-11
+
+<small>[Compare with 0.10.16](https://github.com/EndstoneMC/endstone/compare/v0.10.16...v0.10.17)</small>
+
+### Fixed
+
+- Resolved several crashes.
+
+### Changed
+
+- Verbose content logs are now suppressed.
+
+## [0.10.16](https://github.com/EndstoneMC/endstone/releases/tag/v0.10.16) - 2025-12-11
+
+<small>[Compare with 0.10.15](https://github.com/EndstoneMC/endstone/compare/v0.10.15...v0.10.16)</small>
+
+### Added
+
+- Added support for BDS version 1.21.130.4.
+
+## [0.10.15](https://github.com/EndstoneMC/endstone/releases/tag/v0.10.15) - 2025-11-21
+
+<small>[Compare with 0.10.14](https://github.com/EndstoneMC/endstone/compare/v0.10.14...v0.10.15)</small>
+
+### Added
+
+- Added support for BDS version 1.21.124.2.
 
 ## [0.10.14](https://github.com/EndstoneMC/endstone/releases/tag/v0.10.14) - 2025-11-18
 
@@ -19,12 +168,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-* Enable packet rate limiting by default to prevent packet flooding.
-* Enable RakNet's connection frequency limiting.
+- Enable packet rate limiting by default to prevent packet flooding.
+- Enable RakNet's connection frequency limiting.
 
 ### Fixed
 
-* Patched a vulnerability that allows malicious clients to continue sending packets after the connection is closed.
+- Patched a vulnerability that allows malicious clients to continue sending packets after the connection is closed.
 
 ## [0.10.13](https://github.com/EndstoneMC/endstone/releases/tag/v0.10.13) - 2025-11-18
 
@@ -32,7 +181,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
-* Resolved a crash that could occur with certain worlds.
+- Resolved a crash that could occur with certain worlds.
 
 ## [0.10.12](https://github.com/EndstoneMC/endstone/releases/tag/v0.10.12) - 2025-11-18
 
@@ -40,15 +189,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-* Added support for BDS version 1.21.123.2.
+- Added support for BDS version 1.21.123.2.
 
 ### Fixed
 
-* Resolved a memory leak caused by chunks not unloading properly.
-* Patched a vulnerability where a crafted LoginPacket with an excessively long certificate chain could crash the server.
-* Patched a vulnerability where a malformed InventoryTransactionPacket could freeze the server.
-* Fixed a crash related to custom dimensions (LeviStone).
-* IP bans are now checked before the server processes player login.
+- Resolved a memory leak caused by chunks not unloading properly.
+- Patched a vulnerability where a crafted LoginPacket with an excessively long certificate chain could crash the server.
+- Patched a vulnerability where a malformed InventoryTransactionPacket could freeze the server.
+- Fixed a crash related to custom dimensions (LeviStone).
+- IP bans are now checked before the server processes player login.
 
 ## [0.10.11](https://github.com/EndstoneMC/endstone/releases/tag/v0.10.11) - 2025-11-06
 
@@ -56,17 +205,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-* Added support for BDS version 1.21.121.1.
+- Added support for BDS version 1.21.121.1.
 
 ### Fixed
 
-* Resolved a crash that could occur when updating the scoreboard of an entity.
-* `Player::setWalkSpeed` now correctly sets the player's walk speed.
+- Resolved a crash that could occur when updating the scoreboard of an entity.
+- `Player::setWalkSpeed` now correctly sets the player's walk speed.
 
 ### Changed
 
-* `PlayerChatEvent` is now triggered before Script API's `ChatSendBeforeEvent`.
-* Verbose database logs (e.g. `Running AutoCompaction...`) are now suppressed.
+- `PlayerChatEvent` is now triggered before Script API's `ChatSendBeforeEvent`.
+- Verbose database logs (e.g. `Running AutoCompaction...`) are now suppressed.
 
 ## [0.10.10](https://github.com/EndstoneMC/endstone/releases/tag/v0.10.10) - 2025-11-01
 
@@ -74,7 +223,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
-* `PlayerItemHeldEvent` is no longer triggered when the `from` slot is the same as the `to` slot.
+- `PlayerItemHeldEvent` is no longer triggered when the `from` slot is the same as the `to` slot.
 
 ## [0.10.9](https://github.com/EndstoneMC/endstone/releases/tag/v0.10.9) - 2025-10-30
 
@@ -82,11 +231,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
-* Resolved crashes in the chunk-related API.
-* Stack traces are no longer shown when the server fails to start due to a port conflict on Windows.
-* Fixed an issue where `CommandSenderWrapper` could not capture the output of custom commands.
-* Fixed an issue in the `/status` command where permission checks were not performed.
-* Fixed a crash that could occur when the Minecraft service was unavailable.
+- Resolved crashes in the chunk-related API.
+- Stack traces are no longer shown when the server fails to start due to a port conflict on Windows.
+- Fixed an issue where `CommandSenderWrapper` could not capture the output of custom commands.
+- Fixed an issue in the `/status` command where permission checks were not performed.
+- Fixed a crash that could occur when the Minecraft service was unavailable.
 
 ## [0.10.8](https://github.com/EndstoneMC/endstone/releases/tag/v0.10.8) - 2025-10-28
 
@@ -94,7 +243,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-* Added support for BDS version 1.21.120.4.
+- Added support for BDS version 1.21.120.4.
 
 ## [0.10.7](https://github.com/EndstoneMC/endstone/releases/tag/v0.10.7) - 2025-10-14
 
@@ -102,12 +251,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-* Added support for BDS version 1.21.113.1.
+- Added support for BDS version 1.21.113.1.
 
 ### Fixed
 
-* Resolve a crash when joining a server using a grayscale skin with an alpha channel.
-* Resolve an issue where item stacks containing blocks could not be given to players.
+- Resolve a crash when joining a server using a grayscale skin with an alpha channel.
+- Resolve an issue where item stacks containing blocks could not be given to players.
 
 ## [0.10.6](https://github.com/EndstoneMC/endstone/releases/tag/v0.10.6) - 2025-10-02
 
@@ -115,7 +264,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-* Added support for BDS version 1.21.111.1.
+- Added support for BDS version 1.21.111.1.
 
 ## [0.10.5](https://github.com/EndstoneMC/endstone/releases/tag/v0.10.5) - 2025-09-26
 
@@ -123,24 +272,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-* Added support for BDS version 1.21.102.1.
-* Added `Level::getSeed` to retrieve the seed of the current level.
-* Added the `/seed` command to display the current level's seed.
-* Added `PlayerChatEvent::getFormat` and `PlayerChatEvent::setFormat` to customize the message format.
+- Added support for BDS version 1.21.102.1.
+- Added `Level::getSeed` to retrieve the seed of the current level.
+- Added the `/seed` command to display the current level's seed.
+- Added `PlayerChatEvent::getFormat` and `PlayerChatEvent::setFormat` to customize the message format.
 
 ### Fixed
 
-* Fixed a crash that could occur when a sub-client joined.
-* Ensured `Inventory::setItem` properly updates the client.
-* Item data is now handled correctly during `ItemStack` construction.
-* `ItemStack::setCount` now correctly updates the item count instead of clearing the entire stack.
-* `PlayerChatEvent::setMessage` now correctly displays the updated message to the client.
+- Fixed a crash that could occur when a sub-client joined.
+- Ensured `Inventory::setItem` properly updates the client.
+- Item data is now handled correctly during `ItemStack` construction.
+- `ItemStack::setCount` now correctly updates the item count instead of clearing the entire stack.
+- `PlayerChatEvent::setMessage` now correctly displays the updated message to the client.
 
 ### Changed
 
-* If a command usage includes a parameter of type `message`, it must be the final parameter. No additional parameters
+- If a command usage includes a parameter of type `message`, it must be the final parameter. No additional parameters
   are allowed after it.
-* On Windows, if the automatic loopback exemption fails, a warning will be shown, but the server will no longer stop
+- On Windows, if the automatic loopback exemption fails, a warning will be shown, but the server will no longer stop
   running.
 
 ## [0.10.4](https://github.com/EndstoneMC/endstone/releases/tag/v0.10.4) - 2025-08-10

@@ -12,8 +12,8 @@ from endstone._version import __version__
 handler = colorlog.StreamHandler()
 handler.setFormatter(
     colorlog.ColoredFormatter(
-        fmt="%(log_color)s[%(asctime)s.%(msecs)03d %(levelname)s] [%(name)s] %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
+        fmt="%(log_color)s[%(asctime)s %(levelname)s]: %(message)s",
+        datefmt="%H:%M:%S",
         reset=True,
         log_colors={
             "DEBUG": "cyan",
@@ -44,7 +44,7 @@ def catch_exceptions(func):
     return wrapper
 
 
-@click.command(help="Starts an endstone server.")
+@click.group(invoke_without_command=True, help="Starts an endstone server.")
 @click.option(
     "-s",
     "--server-folder",
@@ -67,14 +67,18 @@ def catch_exceptions(func):
     help="The remote URL to retrieve bedrock server data from.",
 )
 @click.option(
-    "--no-interactive",
-    is_flag=True,
-    envvar="ENDSTONE_NO_INTERACTIVE",
-    help="Disable interactive console.",
+    "-i",
+    "--interactive/--no-interactive",
+    default=platform.system().lower() == "windows",
+    help="Enable interactive console (default on Windows, disabled on Linux).",
 )
 @click.version_option(__version__)
+@click.pass_context
 @catch_exceptions
-def main(server_folder: str, no_confirm: bool, remote: str, no_interactive: bool) -> None:
+def main(ctx, server_folder: str, no_confirm: bool, remote: str, interactive: bool) -> None:
+    if ctx.invoked_subcommand is not None:
+        return
+
     system = platform.system()
     if system == "Windows":
         from .windows import WindowsBootstrap
@@ -88,7 +92,7 @@ def main(server_folder: str, no_confirm: bool, remote: str, no_interactive: bool
     else:
         raise NotImplementedError(f"{system} is not supported.")
 
-    bootstrap = cls(server_folder=server_folder, no_confirm=no_confirm, remote=remote, no_interactive=no_interactive)
+    bootstrap = cls(server_folder=server_folder, no_confirm=no_confirm, remote=remote, interactive=interactive)
     exit_code = bootstrap.run()
     if exit_code != 0:
         logger.error(f"Server exited with non-zero code {exit_code}.")

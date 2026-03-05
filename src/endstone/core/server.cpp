@@ -65,28 +65,7 @@ namespace fs = std::filesystem;
 namespace py = pybind11;
 
 namespace endstone::core {
-namespace {
-class ServerInstanceStopListener : ServerInstanceEventListener {
-public:
-    ::EventResult onServerThreadStopped(ServerInstance &instance) override
-    {
-        if (entt::locator<EndstoneServer>::has_value()) {
-            auto &server = entt::locator<EndstoneServer>::value();
-            server.disablePlugins();
-        }
-        entt::locator<EndstoneServer>::reset();
-        return ::EventResult::KeepGoing;
-    }
-
-    static ServerInstanceEventListener &getInstance()
-    {
-        static ServerInstanceStopListener instance;
-        return instance;
-    }
-};
-}  // namespace
-
-EndstoneServer::EndstoneServer() : logger_(LoggerFactory::getLogger("Server"))
+EndstoneServer::EndstoneServer() : logger_(LoggerFactory::getLogger(""))
 {
     EndstoneServer::getLogger().info("{}This server is running {} version: {} (Minecraft: {})",
                                      ColorFormat::DarkAqua + ColorFormat::Bold, EndstoneServer::getName(),
@@ -120,7 +99,6 @@ void EndstoneServer::init(ServerInstance &server_instance)
         throw std::runtime_error("Server instance already initialized.");
     }
     server_instance_ = &server_instance;
-    server_instance_->getEventCoordinator()->registerListener(&ServerInstanceStopListener::getInstance());
     command_sender_ = std::make_shared<EndstoneConsoleCommandSender>();
     command_sender_->recalculatePermissions();
     player_ban_list_->load();
@@ -140,15 +118,21 @@ void EndstoneServer::setLevel(::Level &level)
     metrics_ = std::make_unique<EndstoneMetrics>(*this);  // start metrics
     loadResourcePacks();
     initRegistries();
-    level._getPlayerDeathManager()->sender_.reset();                       // prevent BDS from sending the death message
-    (void)dispatchCommand(getCommandSender(), "reloadpacketlimitconfig");  // enable packet rate limiter
 
-    // #blameMojang
-    // MapItemSavedData never removes disconnected players from its
-    // tracked-entity list. Each stale tracker holds a ChunkViewSource that
-    // keeps a 256×256 chunk area permanently loaded, causing massive memory
-    // retention as players spread out.
-    // Fix: when a gameplay user is removed, purge them from all maps.
+    // enable packet rate limiter
+    (void)dispatchCommand(getCommandSender(), "reloadpacketlimitconfig");
+
+    // prevent BDS from sending these messages by default - we allow plugin to override these messages
+    auto &text_settings =
+        const_cast<ServerTextSettingsBitset &>(server_instance_->getServerTextSettings()->getEnabledServerTextEvents());
+    text_settings_ = text_settings;
+    text_settings.reset(static_cast<std::underlying_type_t<ServerTextEvent>>(ServerTextEvent::PlayerConnection));
+    text_settings.reset(static_cast<std::underlying_type_t<ServerTextEvent>>(ServerTextEvent::PlayerChangedSkin));
+    level._getPlayerDeathManager()->sender_.reset();  // player death
+
+    // #blameMojang - MapItemSavedData tracks players for map updates but never cleans up on disconnect.
+    // Each stale tracker pins a 256x256 chunk area in memory. Players come and go, memory only goes up.
+    // Fix: actually remove players from map trackers when they leave.
     on_gameplay_user_removed_ = level.getGameplayUserManager()->getGameplayUserRemovedConnector().connect(
         [&](EntityContext &entity) {
             if (auto *player = ::Player::tryGetFromEntity(entity, true); player) {
@@ -197,8 +181,8 @@ void EndstoneServer::setLevel(::Level &level)
 
     // start accepting input
     runtime::stdin_restore();
-    auto &server = static_cast<DedicatedServer &>(server_instance_->app_);
-    server.console_input_reader_->startEndstone();
+    auto *server = entt::locator<DedicatedServer *>::value();
+    server->console_input_reader_->startEndstone();
 }
 
 void EndstoneServer::initRegistries()
@@ -225,6 +209,10 @@ void EndstoneServer::initPackSource(const PackSourceFactory &pack_source_factory
     if (resource_pack_source_) {
         throw std::runtime_error("Resource pack source already created.");
     }
+    if (!resource_pack_repository_) {
+        throw std::runtime_error(
+            "Resource pack repository not set. Check the hook for RepositoryFactory::createSources.");
+    }
     auto io = pack_source_factory.createPackIOProvider();
     resource_pack_source_ = std::make_unique<EndstonePackSource>(EndstonePackSourceOptions(
         PackSourceOptions(std::move(io)), resource_pack_repository_->getResourcePacksPath().getContainer(),
@@ -244,6 +232,12 @@ bool EndstoneServer::getAllowClientPacks() const
 bool EndstoneServer::logCommands() const
 {
     return log_commands_;
+}
+
+bool EndstoneServer::isServerTextEnabled(ServerTextEvent event) const
+{
+    return text_settings_.getEnabledServerTextEvents().test(
+        static_cast<std::underlying_type_t<ServerTextEvent>>(event));
 }
 
 void EndstoneServer::loadResourcePacks()
@@ -293,14 +287,7 @@ std::string EndstoneServer::getVersion() const
 
 std::string EndstoneServer::getMinecraftVersion() const
 {
-    static auto minecraft_version = [] {
-        auto game_version = Common::getGameVersionString();
-        if (game_version[0] == 'v') {
-            game_version = game_version.substr(1);  // Removes the initial 'v'
-        }
-        return game_version;
-    }();
-    return minecraft_version;
+    return MINECRAFT_VERSION;
 }
 
 int EndstoneServer::getProtocolVersion() const
@@ -371,7 +358,7 @@ void EndstoneServer::enablePlugins(PluginLoadOrder type)
     if (type == PluginLoadOrder::PostWorld) {
         command_map_->setPluginCommands();
         DefaultPermissions::registerCorePermissions();
-        DefaultPermissions::registerMinecraftPermissions();
+        MinecraftDefaultPermissions::registerCorePermissions();
     }
 
     auto plugins = plugin_manager_->getPlugins();
@@ -386,9 +373,12 @@ void EndstoneServer::enablePlugin(Plugin &plugin)
 {
     auto perms = plugin.getDescription().getPermissions();
     for (const auto &perm : perms) {
-        if (plugin_manager_->addPermission(std::make_unique<Permission>(perm)) == nullptr) {
-            getLogger().warning("Plugin {} tried to register permission '{}' that was already registered.",
-                                plugin.getDescription().getFullName(), perm.getName());
+        if (plugin_manager_->getPermission(perm.getName()) == nullptr) {
+            plugin_manager_->addPermission(std::make_unique<Permission>(perm));
+        }
+        else {
+            getLogger().error("Plugin {} tried to register permission '{}' that was already registered.",
+                              plugin.getDescription().getFullName(), perm.getName());
         }
     }
     plugin_manager_->dirtyPermissibles(PermissionLevel::Default);
@@ -479,7 +469,7 @@ bool EndstoneServer::getOnlineMode() const
 void EndstoneServer::shutdown()
 {
     static_cast<EndstoneScheduler &>(getScheduler()).runTask([this]() {
-        server_instance_->getMinecraft()->requestServerShutdown("");
+        server_instance_->getMinecraft()->requestServerShutdown();
     });
 }
 
@@ -504,7 +494,7 @@ void EndstoneServer::reload()
 
 void EndstoneServer::reloadData()
 {
-    server_instance_->getMinecraft()->requestResourceReload();
+    server_instance_->onRequestResourceReload();
     level_->getHandle().loadFunctionManager();
     initRegistries();
 }
@@ -617,7 +607,10 @@ std::unique_ptr<BlockData> EndstoneServer::createBlockData(std::string type, Blo
 {
     std::unordered_map<std::string, std::variant<int, std::string, bool>> states;
     for (const auto &state : block_states) {
-        std::visit(overloaded{[&](auto &&arg) { states.emplace(state.first, arg); }}, state.second);
+        std::visit(overloaded{[&](auto &&arg) {
+                       states.emplace(state.first, arg);
+                   }},
+                   state.second);
     }
     const auto block_descriptor = ScriptModuleMinecraft::ScriptBlockUtils::createBlockDescriptor(type, states);
     const auto *block = block_descriptor.tryGetBlockNoLogging();
@@ -662,8 +655,9 @@ MapView &EndstoneServer::createMap(const Dimension &dimension) const
 {
     auto &dim = static_cast<const EndstoneDimension &>(dimension).getHandle();
     auto &level = dim.getLevel();
+    // TODO: should we use dimension spawn point instead of BlockPos::ZERO?
     // creates a new map at world spawn with the scale of 3, without tracking position and unlimited tracking
-    const auto &map = level.createMapSavedData(ActorUniqueID::INVALID_ID, dim.getSpawnPos(), dim.getDimensionId(), 3);
+    const auto &map = level.createMapSavedData(ActorUniqueID::INVALID_ID, BlockPos::ZERO, dim.getDimensionId(), 3);
     return map.getMapView();
 }
 

@@ -47,12 +47,14 @@
 #include "bedrock/world/actor/actor_flags.h"
 #include "bedrock/world/actor/actor_initialization_method.h"
 #include "bedrock/world/actor/actor_runtime_id.h"
+#include "bedrock/world/actor/actor_swing_source.h"
 #include "bedrock/world/actor/actor_terrain_interlock_data.h"
 #include "bedrock/world/actor/actor_types.h"
 #include "bedrock/world/actor/actor_unique_id.h"
 #include "bedrock/world/actor/armor_slot.h"
 #include "bedrock/world/actor/synched_actor_data.h"
 #include "bedrock/world/effect/mob_effect_instance.h"
+#include "bedrock/world/gamemode/interaction_result.h"
 #include "bedrock/world/item/equipment_slot.h"
 #include "bedrock/world/item/item_helper.h"
 #include "bedrock/world/level/dimension/dimension.h"
@@ -155,7 +157,6 @@ public:
     [[nodiscard]] virtual std::string getEntityLocNameString() const = 0;
     [[nodiscard]] virtual bool isInvisible() const = 0;
     [[nodiscard]] virtual bool canShowNameTag() const = 0;
-    [[nodiscard]] virtual std::string getFormattedNameTag() const = 0;
     [[nodiscard]] virtual mce::Color getNameTagTextColor() const = 0;
     [[nodiscard]] virtual float getShadowRadius() const = 0;
     [[nodiscard]] virtual Vec3 getHeadLookVector(float) const = 0;
@@ -234,17 +235,17 @@ public:
     [[nodiscard]] virtual bool canObstructSpawningAndBlockPlacement() const = 0;
     virtual AnimationComponent &getAnimationComponent() = 0;
     virtual void openContainerComponent(Player &) = 0;
-    virtual bool swing() = 0;
+    virtual bool swing(ActorSwingSource swing_source) = 0;
     virtual void useItem(ItemStackBase &, ItemUseMethod, bool) = 0;
     virtual void getDebugText(std::vector<std::string> &) = 0;
     [[nodiscard]] virtual float getMapDecorationRotation() const = 0;
     [[nodiscard]] virtual float getPassengerYRotation(Actor const &) const = 0;
     virtual bool add(ItemStack &) = 0;
     virtual bool drop(ItemStack const &, bool) = 0;
-    virtual bool getInteraction(Player &, ActorInteraction &, Vec3 const &) = 0;
+    virtual InteractionResult getInteraction(Player &, ActorInteraction &, Vec3 const &) = 0;
     [[nodiscard]] virtual bool canDestroyBlock(Block const &) const = 0;
     virtual void setAuxValue(int) = 0;
-    virtual void renderDebugServerState(Options const &) = 0;
+    virtual void renderDebugServerState(const IOptionsReader &options) = 0;
     virtual void kill() = 0;
     virtual void die(ActorDamageSource const &) = 0;
     [[nodiscard]] virtual bool shouldDropDeathLoot() const = 0;
@@ -322,7 +323,7 @@ public:
     void setNameTag(const std::string &);
     [[nodiscard]] const std::string &getScoreTag() const;
     void setScoreTag(const std::string &);
-    [[nodiscard]] const AttributeInstance &getAttribute(const HashedString &name) const;      // Endstone
+    [[nodiscard]] const AttributeInstance *getAttribute(const HashedString &name) const;      // Endstone
     [[nodiscard]] MutableAttributeWithContext getMutableAttribute(const HashedString &name);  // Endstone
     [[nodiscard]] float getFallDistance() const;
     void setFallDistance(float);

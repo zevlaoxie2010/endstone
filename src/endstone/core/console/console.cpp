@@ -33,9 +33,16 @@ bool is_true(const char *v)
 
 EndstoneConsole::EndstoneConsole()
 {
-    const char *value = std::getenv("ENDSTONE_NO_INTERACTIVE");
-    if (!is_true(value)) {
+    const char *value = std::getenv("ENDSTONE_USE_INTERACTIVE_CONSOLE");
+    if (is_true(value)) {
         rx_ = replxx::Replxx{};
+        rx_->history_load(".console_history");
+    }
+}
+EndstoneConsole::~EndstoneConsole()
+{
+    if (rx_.has_value()) {
+        rx_->history_save(".console_history");
     }
 }
 

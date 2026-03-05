@@ -15,6 +15,7 @@ find_package(replxx REQUIRED)
 find_package(sentry REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(tomlplusplus REQUIRED)
+find_package(zstr CONFIG REQUIRED)
 
 add_library(endstone_core
         crash_handler.cpp
@@ -38,6 +39,7 @@ add_library(endstone_core
         block/block_data.cpp
         block/block_face.cpp
         block/block_state.cpp
+        block/block_snapshot.cpp
         boss/boss_bar.cpp
         console/console.cpp
         command/block_command_sender.cpp
@@ -61,11 +63,12 @@ add_library(endstone_core
         command/defaults/version_command.cpp
         damage/damage_source.cpp
         enchantments/enchantment.cpp
-        event/server/server_list_ping_event.cpp
         form/form_codec.cpp
         inventory/meta/item_meta.cpp
+        inventory/meta/book_meta.cpp
+        inventory/meta/crossbow_meta.cpp
         inventory/meta/map_meta.cpp
-        inventory/inventory.cpp
+        inventory/meta/writable_book_meta.cpp
         inventory/item_factory.cpp
         inventory/item_metas.cpp
         inventory/item_stack.cpp
@@ -120,7 +123,8 @@ target_link_libraries(endstone_core PUBLIC
         replxx::replxx
         sentry::sentry
         spdlog::spdlog
-        tomlplusplus::tomlplusplus)
+        tomlplusplus::tomlplusplus
+        zstr::zstr)
 target_compile_definitions(endstone_core PUBLIC PYBIND11_DETAILED_ERROR_MESSAGES)
 if (ENDSTONE_ENABLE_DEVTOOLS)
     add_subdirectory(devtools)

@@ -36,6 +36,7 @@ namespace endstone::core {
 class EndstonePluginManager : public PluginManager {
 public:
     explicit EndstonePluginManager(Server &server);
+    ~EndstonePluginManager() override;
 
     /** Plugin loading */
     void registerLoader(std::unique_ptr<PluginLoader> loader) override;
@@ -59,7 +60,7 @@ public:
 
     /** Permission system */
     [[nodiscard]] Permission *getPermission(std::string name) const override;
-    Permission *addPermission(std::unique_ptr<Permission> perm) override;
+    Permission &addPermission(std::unique_ptr<Permission> perm) override;
     void removePermission(Permission &perm) override;
     void removePermission(std::string name) override;
     [[nodiscard]] std::vector<Permission *> getDefaultPermissions(PermissionLevel level) const override;

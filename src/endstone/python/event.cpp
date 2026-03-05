@@ -125,14 +125,50 @@ void init_event(py::module_ &m, py::class_<Event> &event)
                                                           "Called when a block is broken by a player.")
         .def_property_readonly("player", &BlockBreakEvent::getPlayer, py::return_value_policy::reference,
                                "Gets the Player that is breaking the block involved in this event.");
+    py::class_<BlockExplodeEvent, BlockEvent, ICancellable>(m, "BlockExplodeEvent",
+                                                             "Called when a block explodes.")
+        .def_property(
+            "block_list",
+            [](const BlockExplodeEvent &self) {
+                std::vector<Block *> blocks;
+                for (const auto &block : self.getBlockList()) {
+                    if (block) {
+                        blocks.emplace_back(block.get());
+                    }
+                }
+                return blocks;
+            },
+            [](BlockExplodeEvent &self, const std::vector<Block *> &blocks) {
+                self.getBlockList().clear();
+                for (const auto &block : blocks) {
+                    if (block) {
+                        self.getBlockList().emplace_back(block->clone());
+                    }
+                }
+            },
+            py::return_value_policy::reference_internal,
+            "Gets or sets the list of blocks that would have been removed or were removed from the explosion event.");
     py::class_<BlockCookEvent, BlockEvent, ICancellable>(m, "BlockCookEvent",
                                                          "Called when an ItemStack is successfully cooked in a block.")
         .def_property_readonly("source", &BlockCookEvent::getSource, py::return_value_policy::reference,
                                "Gets the smelted ItemStack for this event")
-        .def_property(
-            "result", &BlockCookEvent::getResult,
-            [](BlockCookEvent &self, const ItemStack &result) { self.setResult(result.clone()); },
-            py::return_value_policy::reference, "Gets or sets the resultant ItemStack for this event");
+        .def_property("result", &BlockCookEvent::getResult, &BlockCookEvent::setResult,
+                      "Gets or sets the resultant ItemStack for this event");
+    py::class_<BlockGrowEvent, BlockEvent, ICancellable>(m, "BlockGrowEvent",
+                                                         "Called when a block grows naturally in the world.\n"
+                                                         "If a Block Grow event is cancelled, the block will not grow.")
+        .def_property_readonly("new_state", &BlockGrowEvent::getNewState, py::return_value_policy::reference,
+                               "Gets the state of the block where it will form or spread to.");
+    py::class_<BlockFormEvent, BlockGrowEvent>(m, "BlockFormEvent",
+                                               "Called when a block is formed or spreads based on world conditions.\n"
+                                               "If a Block Form event is cancelled, the block will not be formed.");
+    py::class_<BlockFromToEvent, BlockEvent, ICancellable>(
+        m, "BlockFromToEvent",
+        "Represents events with a source block and a destination block, currently only applies to liquid "
+        "(lava and water) and teleporting dragon eggs.\n"
+        "If a Block From To event is cancelled, the block will not move (the liquid will not flow).")
+        .def_property_readonly("to_block", &BlockFromToEvent::getToBlock, py::return_value_policy::reference,
+                               "Gets the faced Block.");
     py::class_<BlockPistonEvent, BlockEvent, ICancellable>(m, "BlockPistonEvent",
                                                            "Called when a piston block is triggered")
         .def_property_readonly("direction", &BlockPistonEvent::getDirection,
@@ -144,11 +180,11 @@ void init_event(py::module_ &m, py::class_<Event> &event)
                                                           "Called when a block is placed by a player.")
         .def_property_readonly("player", &BlockPlaceEvent::getPlayer, py::return_value_policy::reference,
                                "Gets the player who placed the block involved in this event.")
-        .def_property_readonly("block_placed_state", &BlockPlaceEvent::getBlockPlacedState,
+        .def_property_readonly("block_placed", &BlockPlaceEvent::getBlockPlaced, py::return_value_policy::reference,
+                               "Gets the block placed.")
+        .def_property_readonly("block_replaced_state", &BlockPlaceEvent::getBlockReplacedState,
                                py::return_value_policy::reference,
-                               "Gets the BlockState for the block which was placed.")
-        .def_property_readonly("block_replaced", &BlockPlaceEvent::getBlockReplaced, py::return_value_policy::reference,
-                               "Gets the block which was replaced.")
+                               "Gets the BlockState for the block which was replaced.")
         .def_property_readonly("block_against", &BlockPlaceEvent::getBlockAgainst, py::return_value_policy::reference,
                                "Gets the block that this block was placed against");
     py::class_<LeavesDecayEvent, BlockEvent, ICancellable>(
@@ -229,7 +265,7 @@ void init_event(py::module_ &m, py::class_<Event> &event)
     player_interact_event
         .def_property_readonly("action", &PlayerInteractEvent::getAction, "Returns the action type of interaction")
         .def_property_readonly("has_item", &PlayerInteractEvent::hasItem, "Check if this event involved an item")
-        .def_property_readonly("item", &PlayerInteractEvent::getItem, py::return_value_policy::reference,
+        .def_property_readonly("item", &PlayerInteractEvent::getItem,
                                "Returns the item in hand represented by this event")
         .def_property_readonly("has_block", &PlayerInteractEvent::hasBlock, "Check if this event involved a block")
         .def_property_readonly("block", &PlayerInteractEvent::getBlock, py::return_value_policy::reference,
@@ -244,8 +280,7 @@ void init_event(py::module_ &m, py::class_<Event> &event)
                                "Gets the actor that was right-clicked by the player.");
     py::class_<PlayerItemConsumeEvent, PlayerEvent, ICancellable>(
         m, "PlayerItemConsumeEvent", "Called when a player is finishing consuming an item (food, potion, milk bucket).")
-        .def_property_readonly("item", &PlayerItemConsumeEvent::getItem, py::return_value_policy::reference,
-                               "Gets or sets the item that is being consumed.")
+        .def_property_readonly("item", &PlayerItemConsumeEvent::getItem, "Gets the item that is being consumed.")
         .def_property_readonly("hand", &PlayerItemConsumeEvent::getHand, "Get the hand used to consume the item.");
     py::class_<PlayerItemHeldEvent, PlayerEvent, ICancellable>(
         m, "PlayerItemHeldEvent", "Called when a player changes their currently held item.")
@@ -353,10 +388,7 @@ void init_event(py::module_ &m, py::class_<Event> &event)
 
     py::class_<ServerListPingEvent, ServerEvent, ICancellable>(m, "ServerListPingEvent",
                                                                "Called when a server ping is coming in.")
-        .def_property_readonly("remote_host", &ServerListPingEvent::getRemoteHost,
-                               "Get the host the ping is coming from.")
-        .def_property_readonly("remote_port", &ServerListPingEvent::getRemotePort,
-                               "Get the port the ping is coming from.")
+        .def_property_readonly("address", &ServerListPingEvent::getAddress, "Get the address the ping is coming from.")
         .def_property("server_guid", &ServerListPingEvent::getServerGuid, &ServerListPingEvent::setServerGuid,
                       "Get or set the unique identifier of the server.")
         .def_property("local_port", &ServerListPingEvent::getLocalPort, &ServerListPingEvent::setLocalPort,

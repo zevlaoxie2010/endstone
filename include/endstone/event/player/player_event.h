@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <functional>
+
 #include "endstone/event/event.h"
 #include "endstone/player.h"
 
@@ -32,10 +34,7 @@ public:
      *
      * @return Player who is involved in this event
      */
-    [[nodiscard]] Player &getPlayer() const
-    {
-        return player_;
-    }
+    [[nodiscard]] Player &getPlayer() const { return player_; }
 
 protected:
     std::reference_wrapper<Player> player_;

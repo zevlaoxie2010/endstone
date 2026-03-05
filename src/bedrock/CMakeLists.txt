@@ -26,6 +26,7 @@ add_library(bedrock STATIC
         core/utility/serialize_simple_types.cpp
         crypto/encoding/base64.cpp
         deps/json/value.cpp
+        deps/raknet/bit_stream.cpp
         deps/raknet/get_time.cpp
         deps/raknet/raknet_types.cpp
         entity/gamerefs_entity/entity_context.cpp
@@ -98,6 +99,7 @@ add_library(bedrock STATIC
         world/item/item_stack.cpp
         world/item/item_stack_base.cpp
         world/item/vanilla_item_tags.cpp
+        world/item/written_book_item.cpp
         world/item/crafting/recipes.cpp
         world/item/enchanting/enchant.cpp
         world/item/registry/creative_group_info.cpp
@@ -116,6 +118,7 @@ add_library(bedrock STATIC
         world/level/block/block_type.cpp
         world/level/block/campfire_block.cpp
         world/level/block/fire_block.cpp
+        world/level/block/liquid_block.cpp
         world/level/block/vanilla_block_type_ids.cpp
         world/level/block/actor/beehive_block_actor.cpp
         world/level/block/actor/furnace_block_actor.cpp

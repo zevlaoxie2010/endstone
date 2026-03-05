@@ -25,6 +25,7 @@ namespace endstone {
  */
 class PluginEnableEvent : public ServerEvent {
 public:
+    ENDSTONE_EVENT(PluginEnableEvent);
     explicit PluginEnableEvent(Plugin &plugin) : plugin_(plugin) {}
 
     /**
@@ -32,16 +33,7 @@ public:
      *
      * @return Plugin for this event
      */
-    [[nodiscard]] Plugin &getPlugin() const
-    {
-        return plugin_;
-    }
-
-    inline static const std::string NAME = "PluginEnableEvent";
-    [[nodiscard]] std::string getEventName() const override
-    {
-        return NAME;
-    }
+    [[nodiscard]] Plugin &getPlugin() const { return plugin_; }
 
 private:
     Plugin &plugin_;

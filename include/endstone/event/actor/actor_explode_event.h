@@ -14,6 +14,10 @@
 
 #pragma once
 
+#include <memory>
+#include <utility>
+#include <vector>
+
 #include "endstone/block/block.h"
 #include "endstone/event/actor/actor_event.h"
 #include "endstone/event/cancellable.h"
@@ -28,17 +32,12 @@ class ActorExplodeEvent : public Cancellable<ActorEvent<Actor>> {
     using BlockList = std::vector<std::unique_ptr<Block>>;
 
 public:
+    ENDSTONE_EVENT(ActorExplodeEvent);
     explicit ActorExplodeEvent(Actor &actor, Location location, BlockList blocks)
         : Cancellable(actor), location_(location), blocks_(std::move(blocks))
     {
     }
     ~ActorExplodeEvent() override = default;
-
-    inline static const std::string NAME = "ActorExplodeEvent";
-    [[nodiscard]] std::string getEventName() const override
-    {
-        return NAME;
-    }
 
     /**
      * @brief Returns the location where the explosion happened.
@@ -47,30 +46,21 @@ public:
      *
      * @return The location of the explosion
      */
-    [[nodiscard]] const Location &getLocation() const
-    {
-        return location_;
-    }
+    [[nodiscard]] const Location &getLocation() const { return location_; }
 
     /**
      * @brief Returns the list of blocks that would have been removed or were removed from the explosion event.
      *
      * @return All blown-up blocks
      */
-    [[nodiscard]] const BlockList &getBlockList() const
-    {
-        return blocks_;
-    }
+    [[nodiscard]] const BlockList &getBlockList() const { return blocks_; }
 
     /**
      * @brief Returns the list of blocks that would have been removed or were removed from the explosion event.
      *
      * @return All blown-up blocks
      */
-    [[nodiscard]] BlockList &getBlockList()
-    {
-        return blocks_;
-    }
+    [[nodiscard]] BlockList &getBlockList() { return blocks_; }
 
 private:
     Location location_;

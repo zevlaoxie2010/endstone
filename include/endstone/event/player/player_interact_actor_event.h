@@ -24,24 +24,16 @@ namespace endstone {
  */
 class PlayerInteractActorEvent : public Cancellable<PlayerEvent> {
 public:
+    ENDSTONE_EVENT(PlayerInteractActorEvent);
     explicit PlayerInteractActorEvent(Player &player, Actor &actor) : Cancellable(player), actor_(actor) {}
     ~PlayerInteractActorEvent() override = default;
-
-    inline static const std::string NAME = "PlayerInteractActorEvent";
-    [[nodiscard]] std::string getEventName() const override
-    {
-        return NAME;
-    }
 
     /**
      * @brief Gets the actor that was right-clicked by the player.
      *
      * @return actor right-clicked by player
      */
-    [[nodiscard]] Actor &getActor() const
-    {
-        return actor_;
-    }
+    [[nodiscard]] Actor &getActor() const { return actor_; }
 
 private:
     Actor &actor_;

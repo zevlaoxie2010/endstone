@@ -14,8 +14,12 @@
 
 #pragma once
 
+#include <functional>
 #include <optional>
 #include <string>
+#include <utility>
+#include <variant>
+#include <vector>
 
 #include "endstone/form/controls/button.h"
 #include "endstone/form/controls/divider.h"
@@ -40,10 +44,7 @@ public:
      *
      * @return The content of the form.
      */
-    [[nodiscard]] Message getContent() const
-    {
-        return content_;
-    }
+    [[nodiscard]] Message getContent() const { return content_; }
 
     /**
      * @brief Set the content of the form.
@@ -113,10 +114,7 @@ public:
      *
      * @return A list of controls in the action form.
      */
-    [[nodiscard]] const std::vector<Control> &getControls() const
-    {
-        return controls_;
-    }
+    [[nodiscard]] const std::vector<Control> &getControls() const { return controls_; }
 
     /**
      * @brief Set the controls of the action form.
@@ -135,10 +133,7 @@ public:
      *
      * @return The on submit callback of the form.
      */
-    [[nodiscard]] OnSubmitCallback getOnSubmit() const
-    {
-        return on_submit_;
-    }
+    [[nodiscard]] OnSubmitCallback getOnSubmit() const { return on_submit_; }
 
     /**
      * @brief Sets the on submit callback of the form.

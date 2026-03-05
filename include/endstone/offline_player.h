@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "endstone/util/uuid.h"
 
 namespace endstone {
@@ -28,6 +30,9 @@ public:
 
     /**
      * @brief Returns the name of this player
+     *
+     * @note Names are no longer unique past a single game session. For persistent storage
+     *       it is recommended that you use getUniqueId() instead.
      *
      * @return Player name or null if we have not seen a name for this player yet
      */

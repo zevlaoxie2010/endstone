@@ -15,23 +15,13 @@ namespace endstone {
  */
 class PlayerBanList : public BanList<PlayerBanEntry> {
 public:
-    virtual ~PlayerBanList() = default;
-
     /**
      * @brief Gets a BanEntry by player name.
      *
      * @param name The player name to search for.
-     * @return PlayerBanEntry* The corresponding entry, or nullptr if none found.
+     * @return PlayerBanEntry The corresponding entry, or nullptr if none found.
      */
-    [[nodiscard]] virtual const PlayerBanEntry *getBanEntry(std::string name) const = 0;
-
-    /**
-     * @brief Gets a BanEntry by player name.
-     *
-     * @param name The player name to search for.
-     * @return PlayerBanEntry* The corresponding entry, or nullptr if none found.
-     */
-    [[nodiscard]] virtual PlayerBanEntry *getBanEntry(std::string name) = 0;
+    [[nodiscard]] Nullable<PlayerBanEntry> getBanEntry(std::string name) const override = 0;
 
     /**
      * @brief Gets a BanEntry by player name, UUID, or XUID.
@@ -39,21 +29,10 @@ public:
      * @param name The player name to search for.
      * @param uuid The UUID of the player to search for, std::nullopt if not used.
      * @param xuid The XUID of the player to search for, std::nullopt if not used.
-     * @return PlayerBanEntry* The corresponding entry, or nullptr if none found.
+     * @return PlayerBanEntry The corresponding entry, or nullptr if none found.
      */
-    [[nodiscard]] virtual const PlayerBanEntry *getBanEntry(std::string name, std::optional<UUID> uuid,
-                                                            std::optional<std::string> xuid) const = 0;
-
-    /**
-     * @brief Gets a BanEntry by player name, UUID, or XUID.
-     *
-     * @param name The player name to search for.
-     * @param uuid The UUID of the player to search for, std::nullopt if not used.
-     * @param xuid The XUID of the player to search for, std::nullopt if not used.
-     * @return PlayerBanEntry* The corresponding entry, or nullptr if none found.
-     */
-    [[nodiscard]] virtual PlayerBanEntry *getBanEntry(std::string name, std::optional<UUID> uuid,
-                                                      std::optional<std::string> xuid) = 0;
+    [[nodiscard]] virtual Nullable<PlayerBanEntry> getBanEntry(std::string name, std::optional<UUID> uuid,
+                                                               std::optional<std::string> xuid) const = 0;
 
     /**
      * @brief Adds a ban to this list. If a previous ban exists, this will update the previous entry.
@@ -62,10 +41,11 @@ public:
      * @param reason The reason for the ban, std::nullopt indicates implementation default.
      * @param expires The date for the ban's expiration (unban), or std::nullopt to imply forever.
      * @param source The source of the ban, std::nullopt indicates implementation default.
-     * @return PlayerBanEntry& The entry for the newly created ban, or the entry for the (updated) previous ban.
+     * @return PlayerBanEntry The entry for the newly created ban, or the entry for the (updated) previous ban.
      */
-    virtual PlayerBanEntry &addBan(std::string name, std::optional<std::string> reason,
-                                   std::optional<BanEntry::Date> expires, std::optional<std::string> source) = 0;
+    NotNull<PlayerBanEntry> addBan(std::string name, std::optional<std::string> reason,
+                                   std::optional<BanEntry::Date> expires,
+                                   std::optional<std::string> source) override = 0;
 
     /**
      * @brief Adds a ban to this list. If a previous ban exists, this will update the previous entry.
@@ -76,11 +56,11 @@ public:
      * @param reason The reason for the ban, std::nullopt indicates implementation default.
      * @param expires The date for the ban's expiration (unban), or std::nullopt to imply forever.
      * @param source The source of the ban, std::nullopt indicates implementation default.
-     * @return PlayerBanEntry& The entry for the newly created ban, or the entry for the (updated) previous ban.
+     * @return PlayerBanEntry The entry for the newly created ban, or the entry for the (updated) previous ban.
      */
-    virtual PlayerBanEntry &addBan(std::string name, std::optional<UUID> uuid, std::optional<std::string> xuid,
-                                   std::optional<std::string> reason, std::optional<BanEntry::Date> expires,
-                                   std::optional<std::string> source) = 0;
+    virtual NotNull<PlayerBanEntry> addBan(std::string name, std::optional<UUID> uuid, std::optional<std::string> xuid,
+                                           std::optional<std::string> reason, std::optional<BanEntry::Date> expires,
+                                           std::optional<std::string> source) = 0;
 
     /**
      * @brief Adds a ban to this list. If a previous ban exists, this will update the previous entry.
@@ -89,10 +69,10 @@ public:
      * @param reason The reason for the ban, std::nullopt indicates implementation default.
      * @param duration The duration of the ban
      * @param source The source of the ban, std::nullopt indicates implementation default.
-     * @return PlayerBanEntry& The entry for the newly created ban, or the entry for the (updated) previous ban.
+     * @return PlayerBanEntry The entry for the newly created ban, or the entry for the (updated) previous ban.
      */
-    virtual PlayerBanEntry &addBan(std::string name, std::optional<std::string> reason, std::chrono::seconds duration,
-                                   std::optional<std::string> source) = 0;
+    NotNull<PlayerBanEntry> addBan(std::string name, std::optional<std::string> reason, std::chrono::seconds duration,
+                                   std::optional<std::string> source) override = 0;
 
     /**
      * @brief Adds a ban to this list. If a previous ban exists, this will update the previous entry.
@@ -103,25 +83,18 @@ public:
      * @param reason The reason for the ban, std::nullopt indicates implementation default.
      * @param duration The duration of the ban
      * @param source The source of the ban, std::nullopt indicates implementation default.
-     * @return PlayerBanEntry& The entry for the newly created ban, or the entry for the (updated) previous ban.
+     * @return PlayerBanEntry The entry for the newly created ban, or the entry for the (updated) previous ban.
      */
-    virtual PlayerBanEntry &addBan(std::string name, std::optional<UUID> uuid, std::optional<std::string> xuid,
-                                   std::optional<std::string> reason, std::chrono::seconds duration,
-                                   std::optional<std::string> source) = 0;
+    virtual NotNull<PlayerBanEntry> addBan(std::string name, std::optional<UUID> uuid, std::optional<std::string> xuid,
+                                           std::optional<std::string> reason, std::chrono::seconds duration,
+                                           std::optional<std::string> source) = 0;
 
     /**
      * @brief Gets a vector containing pointers to every BanEntry in this list.
      *
      * @return A vector containing pointers to every entry tracked by this list.
      */
-    [[nodiscard]] virtual std::vector<const PlayerBanEntry *> getEntries() const = 0;
-
-    /**
-     * @brief Gets a vector containing pointers to every BanEntry in this list.
-     *
-     * @return  A vector containing pointers to every entry tracked by this list.
-     */
-    [[nodiscard]] virtual std::vector<PlayerBanEntry *> getEntries() = 0;
+    [[nodiscard]] std::vector<NotNull<PlayerBanEntry>> getEntries() const override = 0;
 
     /**
      * @brief Checks if a BanEntry exists for the target, indicating an active ban status.
@@ -130,7 +103,7 @@ public:
      * @return true If a BanEntry exists for the target, indicating an active ban status.
      * @return false Otherwise.
      */
-    [[nodiscard]] virtual bool isBanned(std::string name) const = 0;
+    [[nodiscard]] bool isBanned(std::string name) const override = 0;
 
     /**
      * @brief Checks if a BanEntry exists for the target, indicating an active ban status.
@@ -149,7 +122,7 @@ public:
      *
      * @param name The player name to remove from this list.
      */
-    virtual void removeBan(std::string name) = 0;
+    void removeBan(std::string name) override = 0;
 
     /**
      * @brief Removes the specified player from this list, therefore indicating a "not banned" status.

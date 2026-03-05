@@ -19,179 +19,65 @@
 
 namespace endstone::core {
 
-int EndstonePlayerInventory::getSize() const
+std::optional<ItemStack> EndstonePlayerInventory::getHelmet() const
 {
-    return EndstoneInventory::getSize();
+    return getArmor(ArmorSlot::Head);
 }
 
-int EndstonePlayerInventory::getMaxStackSize() const
+std::optional<ItemStack> EndstonePlayerInventory::getChestplate() const
 {
-    return EndstoneInventory::getMaxStackSize();
+    return getArmor(ArmorSlot::Torso);
 }
 
-std::unique_ptr<ItemStack> EndstonePlayerInventory::getItem(int index) const
+std::optional<ItemStack> EndstonePlayerInventory::getLeggings() const
 {
-    return EndstoneInventory::getItem(index);
+    return getArmor(ArmorSlot::Legs);
 }
 
-void EndstonePlayerInventory::setItem(int index, const ItemStack *item)
+std::optional<ItemStack> EndstonePlayerInventory::getBoots() const
 {
-    EndstoneInventory::setItem(index, item);
+    return getArmor(ArmorSlot::Feet);
 }
 
-std::unordered_map<int, ItemStack *> EndstonePlayerInventory::addItem(std::vector<ItemStack *> items)
+void EndstonePlayerInventory::setHelmet(std::optional<ItemStack> helmet)
 {
-    return EndstoneInventory::addItem(items);
+    setArmor(ArmorSlot::Head, helmet);
 }
 
-std::unordered_map<int, ItemStack *> EndstonePlayerInventory::removeItem(std::vector<ItemStack *> items)
+void EndstonePlayerInventory::setChestplate(std::optional<ItemStack> chestplate)
 {
-    return EndstoneInventory::removeItem(items);
+    setArmor(ArmorSlot::Torso, chestplate);
 }
 
-std::vector<std::unique_ptr<ItemStack>> EndstonePlayerInventory::getContents() const
+void EndstonePlayerInventory::setLeggings(std::optional<ItemStack> leggings)
 {
-    return EndstoneInventory::getContents();
+    setArmor(ArmorSlot::Legs, leggings);
 }
 
-void EndstonePlayerInventory::setContents(std::vector<ItemStack const *> items)
+void EndstonePlayerInventory::setBoots(std::optional<ItemStack> boots)
 {
-    return EndstoneInventory::setContents(items);
+    setArmor(ArmorSlot::Feet, boots);
 }
 
-bool EndstonePlayerInventory::contains(const std::string &type) const
-{
-    return EndstoneInventory::contains(type);
-}
-
-bool EndstonePlayerInventory::contains(const ItemStack &item) const
-{
-    return EndstoneInventory::contains(item);
-}
-
-bool EndstonePlayerInventory::contains(const ItemStack &item, int amount) const
-{
-    return EndstoneInventory::contains(item, amount);
-}
-
-bool EndstonePlayerInventory::containsAtLeast(const std::string &type, int amount) const
-{
-    return EndstoneInventory::containsAtLeast(type, amount);
-}
-
-bool EndstonePlayerInventory::containsAtLeast(const ItemStack &item, int amount) const
-{
-    return EndstoneInventory::containsAtLeast(item, amount);
-}
-
-std::unordered_map<int, std::unique_ptr<ItemStack>> EndstonePlayerInventory::all(const std::string &type) const
-{
-    return EndstoneInventory::all(type);
-}
-
-std::unordered_map<int, std::unique_ptr<ItemStack>> EndstonePlayerInventory::all(const ItemStack &item) const
-{
-    return EndstoneInventory::all(item);
-}
-
-int EndstonePlayerInventory::first(const std::string &type) const
-{
-    return EndstoneInventory::first(type);
-}
-
-int EndstonePlayerInventory::first(const ItemStack &item) const
-{
-    return EndstoneInventory::first(item);
-}
-
-int EndstonePlayerInventory::firstEmpty() const
-{
-    return EndstoneInventory::firstEmpty();
-}
-
-void EndstonePlayerInventory::remove(const std::string &type)
-{
-    return EndstoneInventory::remove(type);
-}
-
-void EndstonePlayerInventory::remove(const ItemStack &item)
-{
-    EndstoneInventory::remove(item);
-}
-
-void EndstonePlayerInventory::clear(int index)
-{
-    EndstoneInventory::clear(index);
-}
-
-bool EndstonePlayerInventory::isEmpty() const
-{
-    return EndstoneInventory::isEmpty();
-}
-
-void EndstonePlayerInventory::clear()
-{
-    EndstoneInventory::clear();
-}
-
-std::unique_ptr<ItemStack> EndstonePlayerInventory::getHelmet() const
-{
-    return EndstoneItemStack::fromMinecraft(holder_.getArmor(ArmorSlot::Head));
-}
-
-std::unique_ptr<ItemStack> EndstonePlayerInventory::getChestplate() const
-{
-    return EndstoneItemStack::fromMinecraft(holder_.getArmor(ArmorSlot::Torso));
-}
-
-std::unique_ptr<ItemStack> EndstonePlayerInventory::getLeggings() const
-{
-    return EndstoneItemStack::fromMinecraft(holder_.getArmor(ArmorSlot::Legs));
-}
-
-std::unique_ptr<ItemStack> EndstonePlayerInventory::getBoots() const
-{
-    return EndstoneItemStack::fromMinecraft(holder_.getArmor(ArmorSlot::Feet));
-}
-
-void EndstonePlayerInventory::setHelmet(const ItemStack *helmet)
-{
-    holder_.setArmor(ArmorSlot::Head, EndstoneItemStack::toMinecraft(helmet));
-}
-
-void EndstonePlayerInventory::setChestplate(const ItemStack *chestplate)
-{
-    holder_.setArmor(ArmorSlot::Torso, EndstoneItemStack::toMinecraft(chestplate));
-}
-
-void EndstonePlayerInventory::setLeggings(const ItemStack *leggings)
-{
-    holder_.setArmor(ArmorSlot::Legs, EndstoneItemStack::toMinecraft(leggings));
-}
-
-void EndstonePlayerInventory::setBoots(const ItemStack *boots)
-{
-    holder_.setArmor(ArmorSlot::Feet, EndstoneItemStack::toMinecraft(boots));
-}
-
-std::unique_ptr<ItemStack> EndstonePlayerInventory::getItemInMainHand() const
+std::optional<ItemStack> EndstonePlayerInventory::getItemInMainHand() const
 {
     return getItem(holder_.getSelectedItemSlot());
 }
 
-void EndstonePlayerInventory::setItemInMainHand(const ItemStack *item)
+void EndstonePlayerInventory::setItemInMainHand(std::optional<ItemStack> item)
 {
-    setItem(holder_.getSelectedItemSlot(), item);
+    setItem(holder_.getSelectedItemSlot(), std::move(item));
 }
 
-std::unique_ptr<ItemStack> EndstonePlayerInventory::getItemInOffHand() const
+std::optional<ItemStack> EndstonePlayerInventory::getItemInOffHand() const
 {
     return EndstoneItemStack::fromMinecraft(holder_.getOffhandSlot());
 }
 
-void EndstonePlayerInventory::setItemInOffHand(const ItemStack *item)
+void EndstonePlayerInventory::setItemInOffHand(std::optional<ItemStack> item)
 {
-    holder_.setOffhandSlot(EndstoneItemStack::toMinecraft(item));
+    const auto item_stack = item.has_value() ? EndstoneItemStack::toMinecraft(*item) : ::ItemStack::EMPTY_ITEM;
+    holder_.setOffhandSlot(item_stack);
 }
 
 int EndstonePlayerInventory::getHeldItemSlot() const
@@ -205,6 +91,21 @@ void EndstonePlayerInventory::setHeldItemSlot(int slot)
                                  "Slot ({}) is not between 0 and {} inclusive", slot,
                                  FillingContainer::HOTBAR_SIZE - 1);
     holder_.setSelectedSlot(slot);
+}
+
+std::optional<ItemStack> EndstonePlayerInventory::getArmor(ArmorSlot slot) const
+{
+    auto item = holder_.getArmor(slot);
+    if (item.isNull()) {
+        return std::nullopt;
+    }
+    return EndstoneItemStack::fromMinecraft(item);
+}
+
+void EndstonePlayerInventory::setArmor(ArmorSlot slot, std::optional<ItemStack> armor)
+{
+    const auto item_stack = armor.has_value() ? EndstoneItemStack::toMinecraft(armor.value()) : ::ItemStack::EMPTY_ITEM;
+    holder_.setArmor(slot, item_stack);
 }
 
 }  // namespace endstone::core

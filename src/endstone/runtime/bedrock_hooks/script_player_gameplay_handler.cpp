@@ -64,6 +64,7 @@ bool handleEvent(const PlayerDamageEvent &event)
             death_message = e.getDeathMessage().value_or("");
 
             // Send death info
+            // TODO(refactor): use ActorDamageSource::setDeathMessageOverride
             const auto packet = MinecraftPackets::createPacket(MinecraftPacketIds::DeathInfo);
             auto &pk = static_cast<DeathInfoPacket &>(*packet);
             auto death_message_tr = endstone::core::EndstoneMessage::toTranslatable(death_message);
@@ -94,8 +95,7 @@ bool handleEvent(const PlayerDisconnectEvent &event)
         server.getPluginManager().callEvent(e);
 
         quit_message = e.getQuitMessage().value_or("");
-        if (server.getServer().getServerTextSettings()->getEnabledServerTextEvents().test(
-                static_cast<std::underlying_type_t<ServerTextEvent>>(ServerTextEvent::PlayerConnection)) &&
+        if (server.isServerTextEnabled(ServerTextEvent::PlayerConnection) &&
             (!std::holds_alternative<std::string>(quit_message) || !std::get<std::string>(quit_message).empty())) {
             server.broadcastMessage(quit_message);
         }
@@ -149,13 +149,14 @@ bool handleEvent(const PlayerInteractWithBlockBeforeEvent &event)
         const auto &server = endstone::core::EndstoneServer::getInstance();
         auto &block_source = player->getDimension().getBlockSourceFromMainChunkSource();
         const auto block = endstone::core::EndstoneBlock::at(block_source, BlockPos(event.block_location));
-        const auto item_stack =
-            event.item.isNull() ? nullptr : endstone::core::EndstoneItemStack::fromMinecraft(event.item);
-
+        std::optional<endstone::ItemStack> item_stack;
+        if (!event.item.isNull()) {
+            item_stack = endstone::core::EndstoneItemStack::fromMinecraft(event.item);
+        }
         endstone::PlayerInteractEvent e{
             player->getEndstoneActor<endstone::core::EndstonePlayer>(),
             endstone::PlayerInteractEvent::Action::RightClickBlock,
-            item_stack.get(),
+            std::move(item_stack),
             block.get(),
             static_cast<endstone::BlockFace>(event.block_face),
             endstone::Vector{event.face_location.x, event.face_location.y, event.face_location.z},

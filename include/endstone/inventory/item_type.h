@@ -14,11 +14,14 @@
 
 #pragma once
 
+#include <string>
+
 #include "endstone/detail.h"
 #include "endstone/registry.h"
 #include "endstone/server.h"
 
 namespace endstone {
+class ItemStack;
 /**
  * @brief Represents an item type.
  */
@@ -67,30 +70,30 @@ public:
      */
     [[nodiscard]] virtual int getMaxDurability() const = 0;
 
-    bool operator==(const ItemTypeId &other) const
-    {
-        return getId() == other;
-    }
+    /**
+     * @brief Constructs a new ItemStack with this item type that has the amount 1.
+     *
+     * @return the constructed item stack.
+     */
+    [[nodiscard]] virtual ItemStack createItemStack() const = 0;
 
-    bool operator!=(const ItemTypeId &other) const
-    {
-        return !(*this == other);
-    }
+    /**
+     * @brief Constructs a new ItemStack with this item type.
+     *
+     * @param amount the amount in the stack
+     * @return An ItemStack of this item type
+     */
+    [[nodiscard]] virtual ItemStack createItemStack(int amount) const = 0;
 
-    bool operator==(const ItemType &other) const
-    {
-        return getId() == other.getId();
-    }
+    bool operator==(const ItemTypeId &other) const { return getId() == other; }
 
-    bool operator!=(const ItemType &other) const
-    {
-        return !(*this == other);
-    }
+    bool operator!=(const ItemTypeId &other) const { return !(*this == other); }
 
-    operator ItemTypeId() const
-    {
-        return getId();
-    }
+    bool operator==(const ItemType &other) const { return getId() == other.getId(); }
+
+    bool operator!=(const ItemType &other) const { return !(*this == other); }
+
+    operator ItemTypeId() const { return getId(); }
 };
 }  // namespace endstone
 

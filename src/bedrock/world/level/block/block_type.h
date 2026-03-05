@@ -148,7 +148,6 @@ public:
     [[nodiscard]] virtual AABB const &getUIShape(Block const &, AABB &) const = 0;
     [[nodiscard]] virtual bool getLiquidClipVolume(Block const &, BlockSource &, BlockPos const &, AABB &) const = 0;
     [[nodiscard]] virtual bool isObstructingChests(BlockSource &, BlockPos const &, Block const &) const = 0;
-    [[nodiscard]] virtual Vec3 randomlyModifyPosition(BlockPos const &, int &) const = 0;
     [[nodiscard]] virtual Vec3 randomlyModifyPosition(BlockPos const &) const = 0;
     virtual void onProjectileHit(BlockSource &, BlockPos const &, Actor const &) const = 0;
     virtual void onLightningHit(BlockSource &, BlockPos const &) const = 0;
@@ -160,7 +159,7 @@ public:
     [[nodiscard]] virtual Block const &getStrippedBlock(Block const &) const = 0;
     [[nodiscard]] virtual bool canProvideSupport(Block const &, FacingID, BlockSupportType type) const = 0;
     [[nodiscard]] virtual bool canProvideMultifaceSupport(Block const &, FacingID) const = 0;
-    [[nodiscard]] virtual bool canConnect(Block const &, FacingID, Block const &) const = 0;
+    // [[nodiscard]] virtual bool canConnect(Block const &, FacingID, Block const &) const = 0;
     [[nodiscard]] virtual bool isMovingBlock() const = 0;
     [[nodiscard]] virtual CopperBehavior const *tryGetCopperBehavior() const = 0;
     [[nodiscard]] virtual bool isStemBlock() const = 0;
@@ -197,12 +196,11 @@ public:
     [[nodiscard]] virtual bool shouldDispense(BlockSource &, Container &) const = 0;
     [[nodiscard]] virtual bool dispense(BlockSource &, Container &, int, Vec3 const &, FacingID) const = 0;
     virtual void transformOnFall(BlockSource &, BlockPos const &, Actor *, float) const = 0;
-    virtual void onRedstoneUpdate(BlockSource &, BlockPos const &, int, bool) const = 0;
+    // virtual void onRedstoneUpdate(BlockSource &, BlockPos const &, int, bool) const = 0;
     virtual void onMove(BlockSource &, BlockPos const &, BlockPos const &) const = 0;
     [[nodiscard]] virtual bool detachesOnPistonMove(BlockSource &, BlockPos const &) const = 0;
     virtual void movedByPiston(BlockSource &, BlockPos const &) const = 0;
     virtual void onStructureBlockPlace(BlockSource &, BlockPos const &) const = 0;
-    // virtual void onStructureNeighborBlockPlace(BlockSource &, BlockPos const &) const = 0;
     virtual void setupRedstoneComponent(BlockSource &, BlockPos const &) const = 0;
     virtual void updateEntityAfterFallOn(BlockPos const &, UpdateEntityAfterFallOnInterface &) const = 0;
     [[nodiscard]] virtual bool isBounceBlock() const = 0;
@@ -231,21 +229,19 @@ public:
     [[nodiscard]] virtual ItemInstance asItemInstance(Block const &, BlockActor const *) const = 0;
     virtual void spawnAfterBreak(BlockSource &, Block const &, BlockPos const &,
                                  ResourceDropsContext const &) const = 0;
-    [[nodiscard]] virtual Block const &getPlacementBlock(Actor const &by, BlockPos const &, FacingID,
-                                                         Vec3 const &clickPos, int itemValue) const = 0;
-    [[nodiscard]] virtual int calcVariant(BlockSource &, BlockPos const &, mce::Color const &baseColor) const = 0;
-    [[nodiscard]] virtual bool isAttachedTo(BlockSource &, BlockPos const &, BlockPos &outAttachedTo) const = 0;
+    [[nodiscard]] virtual Block const &getPlacementBlock(Actor const &, BlockPos const &, FacingID, Vec3 const &,
+                                                         int) const = 0;
+    [[nodiscard]] virtual int calcVariant(BlockSource &, BlockPos const &, mce::Color const &) const = 0;
+    [[nodiscard]] virtual bool isAttachedTo(BlockSource &, BlockPos const &, BlockPos &) const = 0;
     [[nodiscard]] virtual bool attack(Player *player, BlockPos const &) const = 0;
     [[nodiscard]] virtual bool shouldTriggerEntityInside(BlockSource &, BlockPos const &, Actor &) const = 0;
     [[nodiscard]] virtual bool canBeBuiltOver(const Block &, BlockSource &, BlockPos const &,
-                                              BlockItem const &newItem) const = 0;
+                                              BlockType const &) const = 0;
     [[nodiscard]] virtual bool canBeBuiltOver(const Block &, BlockSource &, BlockPos const &) const = 0;
     virtual void triggerEvent(BlockSource &, BlockPos const &, int b0, int b1) const = 0;
-    virtual void executeEvent(BlockSource &, BlockPos const &, Block const &, std::string const &eventName,
-                              Actor &sourceEntity) const = 0;
+    // virtual void executeEvent(BlockSource &, BlockPos const &, Block const &, std::string const &, Actor &) const = 0;
     [[nodiscard]] virtual bool hasTag(BlockSource &, BlockPos const &, Block const &, std::string const &) const = 0;
-    [[nodiscard]] virtual MobSpawnerData const *getMobToSpawn(SpawnConditions const &conditions,
-                                                              BlockSource &) const = 0;
+    [[nodiscard]] virtual MobSpawnerData const *getMobToSpawn(SpawnConditions const &, BlockSource &) const = 0;
     [[nodiscard]] virtual bool shouldStopFalling(Actor &) const = 0;
     [[nodiscard]] virtual bool pushesUpFallingBlocks() const = 0;
     [[nodiscard]] virtual bool canHaveExtraData() const = 0;
@@ -289,6 +285,7 @@ public:
     [[nodiscard]] virtual bool canSurvive(BlockSource &, BlockPos const &) const = 0;
     [[nodiscard]] virtual BlockRenderLayer getRenderLayer(Block const &, BlockSource &, BlockPos const &) const = 0;
     [[nodiscard]] virtual int getExtraRenderLayers() const = 0;
+    [[nodiscard]] virtual const HashedString &getCullingLayer() const = 0;
     [[nodiscard]] virtual Brightness getLight(Block const &) const = 0;
     [[nodiscard]] virtual Brightness getEmissiveBrightness(Block const &) const = 0;
     [[nodiscard]] virtual mce::Color getMapColor(BlockSource &, BlockPos const &, Block const &) const = 0;
@@ -365,7 +362,7 @@ private:
     float thickness_;
     bool can_slide_;
     bool can_react_to_neighbors_during_instatick_;
-    bool is_interaction_;
+    // bool is_interaction_;
     float gravity_;
     const Material &material_;
     bool falling_;
@@ -391,22 +388,17 @@ private:
 protected:
     Brightness light_block_;
     Brightness light_emission_;
-    Color map_color_;
+    Color map_color_; // +400
     float friction_;
     NoteBlockInstrument note_block_instrument_;
     TintMethod tint_method_;
     bool return_default_block_on_unidentified_block_state_;
 
 private:
-    NewBlockID id_;  // +450
+    NewBlockID id_;  // +426
     BaseGameVersion min_required_game_version_;
     bool is_vanilla_;
     std::vector<HashedString> tags_;
-
-public:
-    std::unordered_map<std::string, void *> event_handlers;
-
-private:
     bool data_driven_vanilla_blocks_and_items_enabled_;
     AABB visual_shape_;
     std::int32_t bits_used_;
@@ -426,10 +418,7 @@ private:
 
 public:
     struct AlteredStateCollection {
-        [[nodiscard]] const BlockState &getBlockState() const
-        {
-            return block_state_;
-        }
+        [[nodiscard]] const BlockState &getBlockState() const { return block_state_; }
         [[nodiscard]] virtual std::optional<int> getState(const BlockType &, int) const = 0;
         [[nodiscard]] virtual const Block *setState(const BlockType &, int, int) const = 0;
 
