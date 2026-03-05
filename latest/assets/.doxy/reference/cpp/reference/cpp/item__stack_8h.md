@@ -11,13 +11,12 @@
 
 
 * `#include <memory>`
-* `#include "endstone/detail.h"`
-* `#include "endstone/inventory/item_factory.h"`
+* `#include <stdexcept>`
+* `#include <string>`
+* `#include <utility>`
 * `#include "endstone/inventory/item_type.h"`
 * `#include "endstone/inventory/meta/item_meta.h"`
 * `#include "endstone/nbt/tag.h"`
-* `#include "endstone/registry.h"`
-* `#include "endstone/server.h"`
 
 
 

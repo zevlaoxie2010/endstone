@@ -24,6 +24,9 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include "endstone/inventory/meta/item_meta.h"
 
 namespace endstone {
@@ -51,10 +54,10 @@ public:
     template <std::convertible_to<std::string>... Args>
     void addPage(Args &&...pages)
     {
-        addPage(std::vector<std::string>{&pages...});
+        addPages(std::vector<std::string>{&pages...});
     }
 
-    virtual void addPage(std::vector<std::string> pages) = 0;
+    virtual void addPages(std::vector<std::string> pages) = 0;
 
     [[nodiscard]] virtual int getPageCount() const = 0;
 };

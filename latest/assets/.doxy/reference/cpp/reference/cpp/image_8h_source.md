@@ -24,7 +24,11 @@
 
 #pragma once
 
+#include <algorithm>
+#include <cstddef>
+#include <cstring>
 #include <string>
+#include <vector>
 
 #include "endstone/util/color.h"
 #include "endstone/util/result.h"
@@ -57,15 +61,9 @@ public:
         }
     }
 
-    [[nodiscard]] int getWidth() const
-    {
-        return width_;
-    }
+    [[nodiscard]] int getWidth() const { return width_; }
 
-    [[nodiscard]] int getHeight() const
-    {
-        return height_;
-    }
+    [[nodiscard]] int getHeight() const { return height_; }
 
     [[nodiscard]] int getDepth() const
     {
@@ -129,10 +127,7 @@ public:
         }
     }
 
-    [[nodiscard]] std::string_view getData() const
-    {
-        return data_;
-    }
+    [[nodiscard]] std::string_view getData() const { return data_; }
 
     static Result<Image> fromArray(Type type, const int width, const int height,
                                    const std::vector<unsigned char> &array)

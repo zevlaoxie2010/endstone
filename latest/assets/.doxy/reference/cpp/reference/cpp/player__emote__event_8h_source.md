@@ -24,6 +24,9 @@
 
 #pragma once
 
+#include <string>
+#include <utility>
+
 #include "endstone/event/cancellable.h"
 #include "endstone/event/player/player_event.h"
 
@@ -31,32 +34,18 @@ namespace endstone {
 
 class PlayerEmoteEvent : public Cancellable<PlayerEvent> {
 public:
+    ENDSTONE_EVENT(PlayerEmoteEvent);
     explicit PlayerEmoteEvent(Player &player, std::string emote_id, bool muted)
         : Cancellable(player), emote_id_(std::move(emote_id)), muted_(muted)
     {
     }
     ~PlayerEmoteEvent() override = default;
 
-    inline static const std::string NAME = "PlayerEmoteEvent";
-    [[nodiscard]] std::string getEventName() const override
-    {
-        return NAME;
-    }
+    [[nodiscard]] std::string getEmoteId() const { return emote_id_; }
 
-    [[nodiscard]] std::string getEmoteId() const
-    {
-        return emote_id_;
-    }
+    [[nodiscard]] bool isMuted() const { return muted_; }
 
-    [[nodiscard]] bool isMuted() const
-    {
-        return muted_;
-    }
-
-    void setMuted(bool muted)
-    {
-        muted_ = muted;
-    }
+    void setMuted(bool muted) { muted_ = muted; }
 
 private:
     std::string emote_id_;

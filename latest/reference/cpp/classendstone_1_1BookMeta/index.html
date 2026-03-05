@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="../../../assets/logo.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -27,7 +27,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.618322db.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2903,11 +2903,11 @@ For latest updates join the chat on
 <tbody>
 <tr>
 <td style="text-align: right;"><a href="../classendstone_1_1Identifier/"><strong>void</strong></a></td>
-<td style="text-align: left;"><a href="../classendstone_1_1WritableBookMeta/#function-addpage-12"><strong>addPage</strong></a> (<a href="../classendstone_1_1Identifier/"><strong>Args</strong></a> &amp;&amp;... pages) <br><em>Adds new pages to the end of the book.</em></td>
+<td style="text-align: left;"><a href="../classendstone_1_1WritableBookMeta/#function-addpage"><strong>addPage</strong></a> (<a href="../classendstone_1_1Identifier/"><strong>Args</strong></a> &amp;&amp;... pages) <br><em>Adds new pages to the end of the book.</em></td>
 </tr>
 <tr>
 <td style="text-align: right;">virtual <a href="../classendstone_1_1Identifier/"><strong>void</strong></a></td>
-<td style="text-align: left;"><a href="../classendstone_1_1WritableBookMeta/#function-addpage-22"><strong>addPage</strong></a> (std::vector&lt; std::string &gt; pages) = 0<br><em>Adds new pages to the end of the book.</em></td>
+<td style="text-align: left;"><a href="../classendstone_1_1WritableBookMeta/#function-addpages"><strong>addPages</strong></a> (std::vector&lt; std::string &gt; pages) = 0<br><em>Adds new pages to the end of the book.</em></td>
 </tr>
 <tr>
 <td style="text-align: right;">virtual std::string</td>
@@ -2935,7 +2935,7 @@ For latest updates join the chat on
 </tr>
 <tr>
 <td style="text-align: right;">virtual <a href="../classendstone_1_1Identifier/"><strong>void</strong></a></td>
-<td style="text-align: left;"><a href="../classendstone_1_1WritableBookMeta/#function-setpages-22"><strong>setPages</strong></a> (std::vector&lt; std::string &gt; pages) = 0<br><em>Maximum 50 pages with 798 characters per page.</em></td>
+<td style="text-align: left;"><a href="../classendstone_1_1WritableBookMeta/#function-setpages-22"><strong>setPages</strong></a> (std::vector&lt; std::string &gt; pages) = 0<br><em>Maximum 50 pages with 256 characters per page.</em></td>
 </tr>
 </tbody>
 </table>
@@ -2980,6 +2980,10 @@ For latest updates join the chat on
 <tr>
 <td style="text-align: right;">virtual std::unordered_map&lt; <a href="../classendstone_1_1Identifier/"><strong>const</strong></a> <a href="../classendstone_1_1Enchantment/"><strong>Enchantment</strong></a> *, <a href="../classendstone_1_1Identifier/"><strong>int</strong></a> &gt;</td>
 <td style="text-align: left;"><a href="../classendstone_1_1ItemMeta/#function-getenchants"><strong>getEnchants</strong></a> () const = 0<br><em>Returns a copy the enchantments in this</em> <a href="../classendstone_1_1ItemMeta/"><em><strong>ItemMeta</strong></em></a> <em>.</em></td>
+</tr>
+<tr>
+<td style="text-align: right;">virtual <a href="../classendstone_1_1Identifier/"><strong>const</strong></a> core::ItemMetaExtras &amp;</td>
+<td style="text-align: left;"><a href="../classendstone_1_1ItemMeta/#function-getextras"><strong>getExtras</strong></a> () const = 0<br></td>
 </tr>
 <tr>
 <td style="text-align: right;">virtual std::vector&lt; std::string &gt;</td>
@@ -3052,10 +3056,6 @@ For latest updates join the chat on
 <tr>
 <td style="text-align: right;">virtual <a href="../classendstone_1_1Identifier/"><strong>void</strong></a></td>
 <td style="text-align: left;"><a href="../classendstone_1_1ItemMeta/#function-setunbreakable"><strong>setUnbreakable</strong></a> (<a href="../classendstone_1_1Identifier/"><strong>bool</strong></a> unbreakable) = 0<br><em>Sets the unbreakable tag. An unbreakable item will not lose durability.</em></td>
-</tr>
-<tr>
-<td style="text-align: right;">virtual <a href="../classendstone_1_1CompoundTag/"><strong>CompoundTag</strong></a></td>
-<td style="text-align: left;"><a href="../classendstone_1_1ItemMeta/#function-tonbt"><strong>toNbt</strong></a> () const = 0<br></td>
 </tr>
 <tr>
 <td style="text-align: right;">virtual</td>
@@ -3293,10 +3293,10 @@ For latest updates join the chat on
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["announce.dismiss", "content.action.edit", "content.action.view", "content.code.annotate", "content.code.copy", "content.tabs.link", "navigation.footer", "navigation.indexes", "navigation.sections", "navigation.tabs", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "../../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "stable", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["announce.dismiss", "content.action.edit", "content.action.view", "content.code.annotate", "content.code.copy", "content.tabs.link", "navigation.footer", "navigation.indexes", "navigation.sections", "navigation.tabs", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "stable", "provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>

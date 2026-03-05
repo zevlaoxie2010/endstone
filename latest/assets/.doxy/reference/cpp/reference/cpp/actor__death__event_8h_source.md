@@ -24,6 +24,9 @@
 
 #pragma once
 
+#include <memory>
+#include <utility>
+
 #include "endstone/damage/damage_source.h"
 #include "endstone/event/actor/actor_event.h"
 
@@ -37,10 +40,7 @@ public:
     {
     }
 
-    [[nodiscard]] DamageSource &getDamageSource() const
-    {
-        return *damage_source_;
-    }
+    [[nodiscard]] DamageSource &getDamageSource() const { return *damage_source_; }
 
 private:
     std::unique_ptr<DamageSource> damage_source_;

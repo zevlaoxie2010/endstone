@@ -24,13 +24,16 @@
 
 #pragma once
 
+#include <cstdint>
+#include <optional>
+
 #include "endstone/actor/actor.h"
 #include "endstone/inventory/item_stack.h"
 
 namespace endstone {
 class Item : public Actor {
 public:
-    [[nodiscard]] virtual std::unique_ptr<ItemStack> getItemStack() const = 0;
+    [[nodiscard]] virtual ItemStack getItemStack() const = 0;
 
     virtual void setItemStack(const ItemStack &stack) = 0;
 

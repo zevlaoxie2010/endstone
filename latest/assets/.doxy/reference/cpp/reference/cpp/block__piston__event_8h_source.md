@@ -24,6 +24,9 @@
 
 #pragma once
 
+#include <memory>
+#include <utility>
+
 #include "endstone/block/block_face.h"
 #include "endstone/event/block/block_event.h"
 #include "endstone/event/cancellable.h"
@@ -37,10 +40,7 @@ public:
     {
     }
 
-    [[nodiscard]] BlockFace getDirection() const
-    {
-        return direction_;
-    }
+    [[nodiscard]] BlockFace getDirection() const { return direction_; }
 
 private:
     BlockFace direction_;

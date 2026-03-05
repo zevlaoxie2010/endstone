@@ -24,6 +24,11 @@
 
 #pragma once
 
+#include <functional>
+#include <optional>
+#include <string>
+#include <utility>
+
 #include "endstone/message.h"
 
 namespace endstone {
@@ -40,10 +45,7 @@ public:
     {
     }
 
-    [[nodiscard]] Message getText() const
-    {
-        return text_;
-    }
+    [[nodiscard]] Message getText() const { return text_; }
 
     Button &setText(Message text)
     {
@@ -51,10 +53,7 @@ public:
         return *this;
     }
 
-    [[nodiscard]] std::optional<std::string> getIcon() const
-    {
-        return icon_;
-    }
+    [[nodiscard]] std::optional<std::string> getIcon() const { return icon_; }
 
     Button &setIcon(std::string icon)
     {
@@ -62,10 +61,7 @@ public:
         return *this;
     }
 
-    [[nodiscard]] OnClickCallback getOnClick() const
-    {
-        return on_click_;
-    }
+    [[nodiscard]] OnClickCallback getOnClick() const { return on_click_; }
 
     Button &setOnClick(OnClickCallback on_click)
     {

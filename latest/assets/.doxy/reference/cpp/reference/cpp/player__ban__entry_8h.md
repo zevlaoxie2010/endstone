@@ -10,6 +10,8 @@
 
 
 
+* `#include <optional>`
+* `#include <string>`
 * `#include <utility>`
 * `#include "endstone/ban/ban_entry.h"`
 * `#include "endstone/util/uuid.h"`
@@ -37,7 +39,7 @@
 
 | Type | Name |
 | ---: | :--- |
-| class | [**PlayerBanEntry**](classendstone_1_1PlayerBanEntry.md) <br> |
+| class | [**PlayerBanEntry**](classendstone_1_1PlayerBanEntry.md) <br>_Represents an entry for a banned player._  |
 
 
 

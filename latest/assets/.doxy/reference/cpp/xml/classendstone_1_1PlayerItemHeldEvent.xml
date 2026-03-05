@@ -17,7 +17,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="include/endstone/event/player/player_item_held_event.h" line="54" column="9" bodyfile="include/endstone/event/player/player_item_held_event.h" bodystart="54" bodyend="-1"/>
+        <location file="include/endstone/event/player/player_item_held_event.h" line="48" column="9" bodyfile="include/endstone/event/player/player_item_held_event.h" bodystart="48" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="classendstone_1_1PlayerItemHeldEvent_1a5082d2da1001d82b0c9a6dcfb2844997" prot="private" static="no" mutable="no">
         <type><ref refid="classendstone_1_1Identifier" kindref="compound">int</ref></type>
@@ -31,7 +31,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="include/endstone/event/player/player_item_held_event.h" line="55" column="9" bodyfile="include/endstone/event/player/player_item_held_event.h" bodystart="55" bodyend="-1"/>
+        <location file="include/endstone/event/player/player_item_held_event.h" line="49" column="9" bodyfile="include/endstone/event/player/player_item_held_event.h" bodystart="49" bodyend="-1"/>
       </memberdef>
     </sectiondef>
     <sectiondef kind="public-func">
@@ -77,7 +77,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="include/endstone/event/player/player_item_held_event.h" line="38" column="10" bodyfile="include/endstone/event/player/player_item_held_event.h" bodystart="38" bodyend="41"/>
+        <location file="include/endstone/event/player/player_item_held_event.h" line="38" column="10" bodyfile="include/endstone/event/player/player_item_held_event.h" bodystart="38" bodyend="38"/>
       </memberdef>
       <memberdef kind="function" id="classendstone_1_1PlayerItemHeldEvent_1a73d70b44a39f70b1a253d4f4ff3a4b7f" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
         <type><ref refid="classendstone_1_1Identifier" kindref="compound">int</ref></type>
@@ -95,7 +95,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="include/endstone/event/player/player_item_held_event.h" line="48" column="10" bodyfile="include/endstone/event/player/player_item_held_event.h" bodystart="48" bodyend="51"/>
+        <location file="include/endstone/event/player/player_item_held_event.h" line="45" column="10" bodyfile="include/endstone/event/player/player_item_held_event.h" bodystart="45" bodyend="45"/>
       </memberdef>
     </sectiondef>
     <briefdescription>
@@ -163,12 +163,13 @@
         </childnode>
       </node>
     </collaborationgraph>
-    <location file="include/endstone/event/player/player_item_held_event.h" line="24" column="1" bodyfile="include/endstone/event/player/player_item_held_event.h" bodystart="24" bodyend="56"/>
+    <location file="include/endstone/event/player/player_item_held_event.h" line="24" column="1" bodyfile="include/endstone/event/player/player_item_held_event.h" bodystart="24" bodyend="50"/>
     <listofallmembers>
       <member refid="classendstone_1_1Cancellable_1a3512b47db69c6001f5c0450051308327" prot="public" virt="virtual"><scope>endstone::PlayerItemHeldEvent</scope><name>cancel</name></member>
       <member refid="classendstone_1_1PlayerItemHeldEvent_1a5082d2da1001d82b0c9a6dcfb2844997" prot="private" virt="non-virtual"><scope>endstone::PlayerItemHeldEvent</scope><name>current_</name></member>
       <member refid="classendstone_1_1Event_1a28cca8d74920493b449d035540acf023" prot="public" virt="non-virtual"><scope>endstone::PlayerItemHeldEvent</scope><name>Event</name></member>
       <member refid="classendstone_1_1Event_1a7199136ebb40e1441bc61e29f83c3cad" prot="public" virt="non-virtual"><scope>endstone::PlayerItemHeldEvent</scope><name>Event</name></member>
+      <member refid="classendstone_1_1Event_1ad20bafd16e0671578e37390b95e5104c" prot="public" virt="non-virtual"><scope>endstone::PlayerItemHeldEvent</scope><name>Event</name></member>
       <member refid="classendstone_1_1Event_1a826fe74f9c4195a36a364b9aeeb321bb" prot="public" virt="pure-virtual"><scope>endstone::PlayerItemHeldEvent</scope><name>getEventName</name></member>
       <member refid="classendstone_1_1PlayerItemHeldEvent_1a73d70b44a39f70b1a253d4f4ff3a4b7f" prot="public" virt="non-virtual"><scope>endstone::PlayerItemHeldEvent</scope><name>getNewSlot</name></member>
       <member refid="classendstone_1_1PlayerEvent_1a3ad904b05886ce30c7299500d9a57fdb" prot="public" virt="non-virtual"><scope>endstone::PlayerItemHeldEvent</scope><name>getPlayer</name></member>
@@ -176,6 +177,7 @@
       <member refid="classendstone_1_1Event_1ae89b54f63dc32b0c8797a59db69b6931" prot="public" virt="non-virtual"><scope>endstone::PlayerItemHeldEvent</scope><name>isAsynchronous</name></member>
       <member refid="classendstone_1_1Cancellable_1a268b73cc5bda0fa5923336d031814faa" prot="public" virt="virtual"><scope>endstone::PlayerItemHeldEvent</scope><name>isCancelled</name></member>
       <member refid="classendstone_1_1Event_1a44a4ff424a8b690c01a2afe10ae68d8f" prot="public" virt="non-virtual"><scope>endstone::PlayerItemHeldEvent</scope><name>operator=</name></member>
+      <member refid="classendstone_1_1Event_1a1d7fc5400782d20be99a3636aa7f53b9" prot="public" virt="non-virtual"><scope>endstone::PlayerItemHeldEvent</scope><name>operator=</name></member>
       <member refid="classendstone_1_1PlayerEvent_1a263609667f42005d6cfe9f3a128477bd" prot="protected" virt="non-virtual"><scope>endstone::PlayerItemHeldEvent</scope><name>player_</name></member>
       <member refid="classendstone_1_1PlayerEvent_1a244b2be43274af72138b157f63455419" prot="public" virt="non-virtual"><scope>endstone::PlayerItemHeldEvent</scope><name>PlayerEvent</name></member>
       <member refid="classendstone_1_1PlayerItemHeldEvent_1a7eec5505b61ad5165f902c407721f5bb" prot="public" virt="non-virtual"><scope>endstone::PlayerItemHeldEvent</scope><name>PlayerItemHeldEvent</name></member>

@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -42,6 +43,8 @@ public:
     virtual ~BlockData() = default;
 
     [[nodiscard]] virtual std::string getType() const = 0;
+
+    [[nodiscard]] virtual std::string getTranslationKey() const = 0;
 
     [[nodiscard]] virtual BlockStates getBlockStates() const = 0;
 

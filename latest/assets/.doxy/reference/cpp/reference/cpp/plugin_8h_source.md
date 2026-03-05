@@ -26,6 +26,7 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <functional>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -61,30 +62,15 @@ public:
 
     virtual void onDisable() {}
 
-    [[nodiscard]] Logger &getLogger() const
-    {
-        return *logger_;
-    }
+    [[nodiscard]] Logger &getLogger() const { return *logger_; }
 
-    [[nodiscard]] bool isEnabled() const
-    {
-        return enabled_;
-    }
+    [[nodiscard]] bool isEnabled() const { return enabled_; }
 
-    [[nodiscard]] PluginLoader &getPluginLoader() const
-    {
-        return *loader_;
-    }
+    [[nodiscard]] PluginLoader &getPluginLoader() const { return *loader_; }
 
-    [[nodiscard]] Server &getServer() const
-    {
-        return *server_;
-    }
+    [[nodiscard]] Server &getServer() const { return *server_; }
 
-    [[nodiscard]] std::string getName() const
-    {
-        return getDescription().getName();
-    };
+    [[nodiscard]] std::string getName() const { return getDescription().getName(); };
 
     [[nodiscard]] PluginCommand *getCommand(std::string name) const
     {
@@ -92,18 +78,15 @@ public:
         return getServer().getPluginCommand(name);
     }
 
-    [[nodiscard]] const std::filesystem::path &getDataFolder() const
-    {
-        return data_folder_;
-    }
+    [[nodiscard]] const std::filesystem::path &getDataFolder() const { return data_folder_; }
 
     template <typename EventType, typename T>
     void registerEvent(void (T::*func)(EventType &), T &instance, EventPriority priority = EventPriority::Normal,
                        bool ignore_cancelled = false)
     {
         getServer().getPluginManager().registerEvent(
-            EventType::NAME, [func, &instance](Event &e) { (instance.*func)(static_cast<EventType &>(e)); },
-            priority, *this, ignore_cancelled);
+            EventType::NAME, [func, &instance](Event &e) { (instance.*func)(static_cast<EventType &>(e)); }, priority,
+            *this, ignore_cancelled);
     }
 
     template <typename EventType>
@@ -210,10 +193,7 @@ public:
         return *this;
     }
 
-    [[nodiscard]] Permission build() const
-    {
-        return Permission(name_, description_, default_value_, children_);
-    }
+    [[nodiscard]] Permission build() const { return Permission(name_, description_, default_value_, children_); }
 
 private:
     std::string name_;

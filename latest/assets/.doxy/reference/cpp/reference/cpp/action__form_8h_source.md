@@ -24,8 +24,12 @@
 
 #pragma once
 
+#include <functional>
 #include <optional>
 #include <string>
+#include <utility>
+#include <variant>
+#include <vector>
 
 #include "endstone/form/controls/button.h"
 #include "endstone/form/controls/divider.h"
@@ -42,10 +46,7 @@ public:
 
     explicit ActionForm() = default;
 
-    [[nodiscard]] Message getContent() const
-    {
-        return content_;
-    }
+    [[nodiscard]] Message getContent() const { return content_; }
 
     ActionForm &setContent(Message text)
     {
@@ -79,10 +80,7 @@ public:
         return *this;
     }
 
-    [[nodiscard]] const std::vector<Control> &getControls() const
-    {
-        return controls_;
-    }
+    [[nodiscard]] const std::vector<Control> &getControls() const { return controls_; }
 
     ActionForm &setControls(const std::vector<Control> &controls)
     {
@@ -90,10 +88,7 @@ public:
         return *this;
     }
 
-    [[nodiscard]] OnSubmitCallback getOnSubmit() const
-    {
-        return on_submit_;
-    }
+    [[nodiscard]] OnSubmitCallback getOnSubmit() const { return on_submit_; }
 
     ActionForm &setOnSubmit(OnSubmitCallback on_submit)
     {

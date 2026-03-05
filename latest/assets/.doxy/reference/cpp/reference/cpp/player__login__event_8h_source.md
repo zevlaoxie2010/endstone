@@ -24,6 +24,9 @@
 
 #pragma once
 
+#include <string>
+#include <utility>
+
 #include "endstone/event/cancellable.h"
 #include "endstone/event/player/player_event.h"
 
@@ -31,27 +34,16 @@ namespace endstone {
 
 class PlayerLoginEvent : public Cancellable<PlayerEvent> {
 public:
+    ENDSTONE_EVENT(PlayerLoginEvent);
     explicit PlayerLoginEvent(Player &player, std::string message = "")
         : Cancellable(player), message_(std::move(message))
     {
     }
     ~PlayerLoginEvent() override = default;
 
-    inline static const std::string NAME = "PlayerLoginEvent";
-    [[nodiscard]] std::string getEventName() const override
-    {
-        return NAME;
-    }
+    [[nodiscard]] const std::string &getKickMessage() const { return message_; }
 
-    [[nodiscard]] const std::string &getKickMessage() const
-    {
-        return message_;
-    }
-
-    void setKickMessage(const std::string &message)
-    {
-        message_ = message;
-    }
+    void setKickMessage(const std::string &message) { message_ = message; }
 
 private:
     std::string message_;

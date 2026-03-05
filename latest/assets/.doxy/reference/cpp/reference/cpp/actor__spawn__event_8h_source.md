@@ -31,14 +31,9 @@ namespace endstone {
 
 class ActorSpawnEvent : public Cancellable<ActorEvent<Actor>> {
 public:
+    ENDSTONE_EVENT(ActorSpawnEvent);
     explicit ActorSpawnEvent(Actor &actor) : Cancellable(actor) {}
     ~ActorSpawnEvent() override = default;
-
-    inline static const std::string NAME = "ActorSpawnEvent";
-    [[nodiscard]] std::string getEventName() const override
-    {
-        return NAME;
-    }
 
     // TODO(event): add spawn cause
 };

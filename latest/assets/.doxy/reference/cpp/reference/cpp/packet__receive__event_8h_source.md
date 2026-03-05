@@ -24,6 +24,10 @@
 
 #pragma once
 
+#include <string>
+#include <string_view>
+#include <utility>
+
 #include "endstone/event/cancellable.h"
 #include "endstone/event/server/server_event.h"
 
@@ -31,6 +35,7 @@ namespace endstone {
 
 class PacketReceiveEvent : public Cancellable<ServerEvent> {
 public:
+    ENDSTONE_EVENT(PacketReceiveEvent);
     PacketReceiveEvent(Player *player, const int packet_id, std::string_view payload, SocketAddress address,
                        const int sub_client_id)
         : player_(player), packet_id_(packet_id), payload_(payload), address_(std::move(address)),
@@ -38,21 +43,9 @@ public:
     {
     }
 
-    inline static const std::string NAME = "PacketReceiveEvent";
-    [[nodiscard]] std::string getEventName() const override
-    {
-        return NAME;
-    }
+    [[nodiscard]] int getPacketId() const { return packet_id_; }
 
-    [[nodiscard]] int getPacketId() const
-    {
-        return packet_id_;
-    }
-
-    [[nodiscard]] std::string_view getPayload() const
-    {
-        return payload_;
-    }
+    [[nodiscard]] std::string_view getPayload() const { return payload_; }
 
     void setPayload(std::string_view payload)
     {
@@ -60,20 +53,11 @@ public:
         payload_ = owned_payload_;
     }
 
-    [[nodiscard]] Player *getPlayer() const
-    {
-        return player_;
-    }
+    [[nodiscard]] Player *getPlayer() const { return player_; }
 
-    [[nodiscard]] SocketAddress getAddress() const
-    {
-        return address_;
-    }
+    [[nodiscard]] SocketAddress getAddress() const { return address_; }
 
-    [[nodiscard]] int getSubClientId() const
-    {
-        return sub_client_id_;
-    }
+    [[nodiscard]] int getSubClientId() const { return sub_client_id_; }
 
 private:
     Player *player_;

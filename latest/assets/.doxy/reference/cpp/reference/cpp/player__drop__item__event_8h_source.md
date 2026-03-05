@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include <utility>
+
 #include "endstone/event/cancellable.h"
 #include "endstone/event/player/player_event.h"
 #include "endstone/inventory/equipment_slot.h"
@@ -34,15 +36,12 @@ class PlayerDropItemEvent final : public Cancellable<PlayerEvent> {
 public:
     ENDSTONE_EVENT(PlayerDropItemEvent)
 
-    explicit PlayerDropItemEvent(Player &player, const ItemStack &drop) : Cancellable(player), drop_(drop) {}
+    explicit PlayerDropItemEvent(Player &player, ItemStack drop) : Cancellable(player), drop_(std::move(drop)) {}
 
-    [[nodiscard]] const ItemStack &getItem() const
-    {
-        return drop_;
-    }
+    [[nodiscard]] const ItemStack &getItem() const { return drop_; }
 
 private:
-    const ItemStack &drop_;
+    ItemStack drop_;
 };
 }  // namespace endstone
 ```

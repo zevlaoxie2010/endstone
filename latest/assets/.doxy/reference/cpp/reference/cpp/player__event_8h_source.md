@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include <functional>
+
 #include "endstone/event/event.h"
 #include "endstone/player.h"
 
@@ -34,10 +36,7 @@ public:
     explicit PlayerEvent(Player &player) : player_(player) {};
     ~PlayerEvent() override = default;
 
-    [[nodiscard]] Player &getPlayer() const
-    {
-        return player_;
-    }
+    [[nodiscard]] Player &getPlayer() const { return player_; }
 
 protected:
     std::reference_wrapper<Player> player_;

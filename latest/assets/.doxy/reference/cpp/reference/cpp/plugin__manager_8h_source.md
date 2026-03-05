@@ -27,6 +27,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include "endstone/event/event.h"
@@ -80,7 +81,7 @@ public:
 
     [[nodiscard]] virtual Permission *getPermission(std::string name) const = 0;
 
-    virtual Permission *addPermission(std::unique_ptr<Permission> perm) = 0;
+    virtual Permission &addPermission(std::unique_ptr<Permission> perm) = 0;
 
     virtual void removePermission(Permission &perm) = 0;
 

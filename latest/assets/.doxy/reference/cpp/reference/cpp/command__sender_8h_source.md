@@ -25,6 +25,7 @@
 #pragma once
 
 #include <string>
+#include <utility>
 
 #include <fmt/format.h>
 
@@ -43,10 +44,7 @@ class Player;
 class CommandSender : public Permissible {
 public:
     // Permissible
-    [[nodiscard]] CommandSender *asCommandSender() const override
-    {
-        return const_cast<CommandSender *>(this);
-    }
+    [[nodiscard]] CommandSender *asCommandSender() const override { return const_cast<CommandSender *>(this); }
 
     [[nodiscard]] virtual ConsoleCommandSender *asConsole() const = 0;
 

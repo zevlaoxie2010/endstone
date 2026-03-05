@@ -81,15 +81,15 @@ See [endstone::ItemMeta](classendstone_1_1ItemMeta.md)
 
 | Type | Name |
 | ---: | :--- |
-|  [**void**](classendstone_1_1Identifier.md) | [**addPage**](#function-addpage-12) ([**Args**](classendstone_1_1Identifier.md) &&... pages) <br>_Adds new pages to the end of the book._  |
-| virtual [**void**](classendstone_1_1Identifier.md) | [**addPage**](#function-addpage-22) (std::vector&lt; std::string &gt; pages) = 0<br>_Adds new pages to the end of the book._  |
+|  [**void**](classendstone_1_1Identifier.md) | [**addPage**](#function-addpage) ([**Args**](classendstone_1_1Identifier.md) &&... pages) <br>_Adds new pages to the end of the book._  |
+| virtual [**void**](classendstone_1_1Identifier.md) | [**addPages**](#function-addpages) (std::vector&lt; std::string &gt; pages) = 0<br>_Adds new pages to the end of the book._  |
 | virtual std::string | [**getPage**](#function-getpage) ([**int**](classendstone_1_1Identifier.md) page) const = 0<br>_Gets the specified page in the book. The given page must exist._  |
 | virtual [**int**](classendstone_1_1Identifier.md) | [**getPageCount**](#function-getpagecount) () const = 0<br>_Gets the number of pages in the book._  |
 | virtual std::vector&lt; std::string &gt; | [**getPages**](#function-getpages) () const = 0<br>_Gets all the pages in the book._  |
 | virtual [**bool**](classendstone_1_1Identifier.md) | [**hasPages**](#function-haspages) () const = 0<br>_Checks for the existence of pages in the book._  |
 | virtual [**void**](classendstone_1_1Identifier.md) | [**setPage**](#function-setpage) ([**int**](classendstone_1_1Identifier.md) page, std::string data) = 0<br>_Sets the specified page in the book. Pages of the book must be contiguous._  |
 |  [**void**](classendstone_1_1Identifier.md) | [**setPages**](#function-setpages-12) ([**Args**](classendstone_1_1Identifier.md) &&... pages) <br>_Clears the existing book pages, and sets the book to use the provided pages._  |
-| virtual [**void**](classendstone_1_1Identifier.md) | [**setPages**](#function-setpages-22) (std::vector&lt; std::string &gt; pages) = 0<br>_Maximum 50 pages with 798 characters per page._  |
+| virtual [**void**](classendstone_1_1Identifier.md) | [**setPages**](#function-setpages-22) (std::vector&lt; std::string &gt; pages) = 0<br>_Maximum 50 pages with 256 characters per page._  |
 
 
 ## Public Functions inherited from endstone::ItemMeta
@@ -106,6 +106,7 @@ See [endstone::ItemMeta](classendstone_1_1ItemMeta.md)
 | virtual std::string | [**getDisplayName**](classendstone_1_1ItemMeta.md#function-getdisplayname) () const = 0<br>_Gets the display name that is set._  |
 | virtual [**int**](classendstone_1_1Identifier.md) | [**getEnchantLevel**](classendstone_1_1ItemMeta.md#function-getenchantlevel) ([**EnchantmentId**](classendstone_1_1Identifier.md) id) const = 0<br>_Checks for the level of the specified enchantment._  |
 | virtual std::unordered\_map&lt; [**const**](classendstone_1_1Identifier.md) [**Enchantment**](classendstone_1_1Enchantment.md) \*, [**int**](classendstone_1_1Identifier.md) &gt; | [**getEnchants**](classendstone_1_1ItemMeta.md#function-getenchants) () const = 0<br>_Returns a copy the enchantments in this_ [_**ItemMeta**_](classendstone_1_1ItemMeta.md) _._ |
+| virtual [**const**](classendstone_1_1Identifier.md) core::ItemMetaExtras & | [**getExtras**](classendstone_1_1ItemMeta.md#function-getextras) () const = 0<br> |
 | virtual std::vector&lt; std::string &gt; | [**getLore**](classendstone_1_1ItemMeta.md#function-getlore) () const = 0<br>_Gets the lore that is set._  |
 | virtual [**int**](classendstone_1_1Identifier.md) | [**getRepairCost**](classendstone_1_1ItemMeta.md#function-getrepaircost) () const = 0<br>_Gets the repair penalty._  |
 | virtual Type | [**getType**](classendstone_1_1ItemMeta.md#function-gettype) () const = 0<br>_Gets the type of this item meta._  |
@@ -124,7 +125,6 @@ See [endstone::ItemMeta](classendstone_1_1ItemMeta.md)
 | virtual [**void**](classendstone_1_1Identifier.md) | [**setLore**](classendstone_1_1ItemMeta.md#function-setlore) (std::optional&lt; std::vector&lt; std::string &gt; &gt; lore) = 0<br>_Sets the lore for this item or removes lore when given_ `std::nullopt` _._ |
 | virtual [**void**](classendstone_1_1Identifier.md) | [**setRepairCost**](classendstone_1_1ItemMeta.md#function-setrepaircost) ([**int**](classendstone_1_1Identifier.md) cost) = 0<br>_Sets the repair penalty._  |
 | virtual [**void**](classendstone_1_1Identifier.md) | [**setUnbreakable**](classendstone_1_1ItemMeta.md#function-setunbreakable) ([**bool**](classendstone_1_1Identifier.md) unbreakable) = 0<br>_Sets the unbreakable tag. An unbreakable item will not lose durability._  |
-| virtual [**CompoundTag**](classendstone_1_1CompoundTag.md) | [**toNbt**](classendstone_1_1ItemMeta.md#function-tonbt) () const = 0<br> |
 | virtual  | [**~ItemMeta**](classendstone_1_1ItemMeta.md#function-itemmeta) () = default<br> |
 
 
@@ -185,7 +185,7 @@ See [endstone::ItemMeta](classendstone_1_1ItemMeta.md)
 
 
 
-### function addPage [1/2]
+### function addPage 
 
 _Adds new pages to the end of the book._ 
 ```C++
@@ -201,7 +201,7 @@ inline void endstone::WritableBookMeta::addPage (
 
 **Note:**
 
-Up to a maximum of 50 pages with 798 characters per page.
+Up to a maximum of 50 pages with 256 characters per page.
 
 
 
@@ -220,11 +220,11 @@ Up to a maximum of 50 pages with 798 characters per page.
 
 
 
-### function addPage [2/2]
+### function addPages 
 
 _Adds new pages to the end of the book._ 
 ```C++
-virtual void endstone::WritableBookMeta::addPage (
+virtual void endstone::WritableBookMeta::addPages (
     std::vector< std::string > pages
 ) = 0
 ```
@@ -235,7 +235,7 @@ virtual void endstone::WritableBookMeta::addPage (
 
 **Note:**
 
-Up to a maximum of 50 pages with 798 characters per page.
+Up to a maximum of 50 pages with 256 characters per page.
 
 
 
@@ -425,7 +425,7 @@ inline void endstone::WritableBookMeta::setPages (
 
 **Note:**
 
-Maximum 50 pages with 798 characters per page.
+Maximum 50 pages with 256 characters per page.
 
 
 
@@ -446,7 +446,7 @@ Maximum 50 pages with 798 characters per page.
 
 ### function setPages [2/2]
 
-_Maximum 50 pages with 798 characters per page._ 
+_Maximum 50 pages with 256 characters per page._ 
 ```C++
 virtual void endstone::WritableBookMeta::setPages (
     std::vector< std::string > pages

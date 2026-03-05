@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include <optional>
+
 #include "endstone/inventory/meta/item_meta.h"
 
 namespace endstone {
@@ -32,13 +34,11 @@ public:
     ENDSTONE_ITEM_META_TYPE(CrossBow)
 
     
-    [[nodiscard]] virtual bool hasChargedProjectiles() const = 0;
+    [[nodiscard]] virtual bool hasChargedProjectile() const = 0;
 
-    [[nodiscard]] virtual std::vector<std::unique_ptr<ItemStack>> getChargedProjectiles() const = 0;
+    [[nodiscard]] virtual std::optional<ItemStack> getChargedProjectile() const = 0;
 
-    virtual void setChargedProjectiles(std::vector<ItemStack *> projectiles) = 0;
-
-    virtual void addChargedProjectile(const ItemStack &item) = 0;
+    virtual void setChargedProjectile(std::optional<ItemStack> projectile) = 0;
 };
 }  // namespace endstone
 ```

@@ -14,27 +14,7 @@ _Represents a player._
 
 
 
-Inherits the following classes: [endstone::Mob](classendstone_1_1Mob.md),  [endstone::OfflinePlayer](classendstone_1_1OfflinePlayer.md)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Inherits the following classes: [endstone::Mob](classendstone_1_1Mob.md)
 
 
 
@@ -171,6 +151,7 @@ Inherits the following classes: [endstone::Mob](classendstone_1_1Mob.md),  [ends
 | virtual [**Scoreboard**](classendstone_1_1Scoreboard.md) & | [**getScoreboard**](#function-getscoreboard) () const = 0<br>_Gets the_ [_**Scoreboard**_](classendstone_1_1Scoreboard.md) _displayed to this player._ |
 | virtual [**Skin**](classendstone_1_1Skin.md) | [**getSkin**](#function-getskin) () const = 0<br>_Gets the player's skin._  |
 | virtual [**int**](classendstone_1_1Identifier.md) | [**getTotalExp**](#function-gettotalexp) () const = 0<br>_Gets the players total experience points._  |
+| virtual [**UUID**](classendstone_1_1UUID.md) | [**getUniqueId**](#function-getuniqueid) () const = 0<br>_Returns the_ [_**UUID**_](classendstone_1_1UUID.md) _of this player._ |
 | virtual [**float**](classendstone_1_1Identifier.md) | [**getWalkSpeed**](#function-getwalkspeed) () const = 0<br>_Gets the current allowed speed that a client can walk._  |
 | virtual std::string | [**getXuid**](#function-getxuid) () const = 0<br>_Returns the Xbox User ID (XUID) of this player._  |
 | virtual [**void**](classendstone_1_1Identifier.md) | [**giveExp**](#function-giveexp) ([**int**](classendstone_1_1Identifier.md) amount) = 0<br>_Gives the player the amount of experience specified._  |
@@ -184,6 +165,7 @@ Inherits the following classes: [endstone::Mob](classendstone_1_1Mob.md),  [ends
 | virtual [**void**](classendstone_1_1Identifier.md) | [**playSound**](#function-playsound) ([**Location**](classendstone_1_1Location.md) location, std::string sound, [**float**](classendstone_1_1Identifier.md) volume, [**float**](classendstone_1_1Identifier.md) pitch) = 0<br>_Play a sound for a player at the location._  |
 | virtual [**void**](classendstone_1_1Identifier.md) | [**resetTitle**](#function-resettitle) () const = 0<br>_Resets the title displayed to the player. This will clear the displayed title / subtitle and reset timings to their default values._  |
 | virtual [**void**](classendstone_1_1Identifier.md) | [**sendForm**](#function-sendform) (FormVariant form) = 0<br>_Sends a form to the player._  |
+| virtual [**void**](classendstone_1_1Identifier.md) | [**sendMap**](#function-sendmap) ([**MapView**](classendstone_1_1MapView.md) & map) = 0<br>_Render a map and send it to the player in its entirety._  |
 | virtual [**void**](classendstone_1_1Identifier.md) | [**sendPacket**](#function-sendpacket) ([**int**](classendstone_1_1Identifier.md) packet\_id, std::string\_view payload) const = 0<br>_Sends a packet to the player._  |
 | virtual [**void**](classendstone_1_1Identifier.md) | [**sendPopup**](#function-sendpopup) (std::string message) const = 0<br>_Sends this player a popup message._  |
 | virtual [**void**](classendstone_1_1Identifier.md) | [**sendTip**](#function-sendtip) (std::string message) const = 0<br>_Sends this player a tip message._  |
@@ -300,19 +282,6 @@ See [endstone::Permissible](classendstone_1_1Permissible.md)
 | virtual  | [**~Permissible**](classendstone_1_1Permissible.md#function-permissible) () = default<br> |
 
 
-## Public Functions inherited from endstone::OfflinePlayer
-
-See [endstone::OfflinePlayer](classendstone_1_1OfflinePlayer.md)
-
-| Type | Name |
-| ---: | :--- |
-| virtual std::string | [**getName**](classendstone_1_1OfflinePlayer.md#function-getname) () const = 0<br>_Returns the name of this player._  |
-| virtual [**UUID**](classendstone_1_1UUID.md) | [**getUniqueId**](classendstone_1_1OfflinePlayer.md#function-getuniqueid) () const = 0<br>_Returns the_ [_**UUID**_](classendstone_1_1UUID.md) _of this player._ |
-| virtual  | [**~OfflinePlayer**](classendstone_1_1OfflinePlayer.md#function-offlineplayer) () = default<br> |
-
-
-
-
 
 
 
@@ -328,30 +297,6 @@ See [endstone::OfflinePlayer](classendstone_1_1OfflinePlayer.md)
 | Type | Name |
 | ---: | :--- |
 | typedef std::variant&lt; [**MessageForm**](classendstone_1_1MessageForm.md), [**ActionForm**](classendstone_1_1ActionForm.md), [**ModalForm**](classendstone_1_1ModalForm.md) &gt; | [**FormVariant**](#typedef-formvariant)  <br> |
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -924,6 +869,31 @@ Current total experience points
 
 
 
+### function getUniqueId 
+
+_Returns the_ [_**UUID**_](classendstone_1_1UUID.md) _of this player._
+```C++
+virtual UUID endstone::Player::getUniqueId () const = 0
+```
+
+
+
+
+
+**Returns:**
+
+[**Player**](classendstone_1_1Player.md) [**UUID**](classendstone_1_1UUID.md) 
+
+
+
+
+
+        
+
+<hr>
+
+
+
 ### function getWalkSpeed 
 
 _Gets the current allowed speed that a client can walk._ 
@@ -1253,6 +1223,36 @@ virtual void endstone::Player::sendForm (
 
 
 * `form` The form to send 
+
+
+
+
+        
+
+<hr>
+
+
+
+### function sendMap 
+
+_Render a map and send it to the player in its entirety._ 
+```C++
+virtual void endstone::Player::sendMap (
+    MapView & map
+) = 0
+```
+
+
+
+This may be used when streaming the map in the normal manner is not desirable.
+
+
+
+
+**Parameters:**
+
+
+* `map` The map to send 
 
 
 
